@@ -1,0 +1,23 @@
+{
+    "name": "total-flex-cms/total-flex-cms",
+    "description": "A flexible configurable saving time CMS system to be used in almost every project you do.",
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Hugo Ferreira",
+            "email": "hugoofab@gmail.com"
+        },
+        {
+            "name": "Gabriel Teles",
+            "email": "gab.teles@hotmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "TotalFlex\\": "."
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
