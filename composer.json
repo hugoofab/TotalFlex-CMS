@@ -15,9 +15,11 @@
     ],
     "autoload": {
         "psr-4": {
-            "TotalFlex\\": "."
+            "TotalFlex\\": "src/"
         }
     },
     "minimum-stability": "dev",
-    "require": {}
+    "require": {
+        "lichtner/fluentpdo": "dev-master"
+    }
 }
