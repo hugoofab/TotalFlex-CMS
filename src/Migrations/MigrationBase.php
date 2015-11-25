@@ -9,12 +9,29 @@ class MigrationBase {
 	private $_db;
 
 	/**
+	 * @var string $_tablePreffix Tables' preffix
+	 */
+	private $_tablePreffix;
+
+	/**
 	 * Initializes the migration, receiving database to execute it.
 	 *
 	 * @param \FluentPDO $db Database to execute
+	 * @param string $tablePreffix Tables' preffix
 	 */
-	public function __construct($db) {
+	public function __construct($db, $tablePreffix) {
 		$this->_db = $db;
+		$this->_tablePreffix = $tablePreffix;
+	}
+
+	/**
+	 * Get table name for generic Total Flex table
+	 *
+	 * @param string $tableName Table name
+	 * @return string Real table name
+	 */
+	public function getTablename($tableName) {
+		return $this->_tablePreffix . $tableName;
 	}
 
 	/**
@@ -28,8 +45,17 @@ class MigrationBase {
 			return true;
 		} catch (\Exception $e) {
 			$this->_db->getPdo()->rollback();
-			$e->printStackTrace();
 			return false;
 		}
+	}
+
+	/**
+	 * Effectively executes the migration
+	 *
+	 * @param \FluentPDO $db The database to execute
+	 * @throws \RuntimeException 
+	 */
+	public function execute($db) {
+		throw new \RuntimeException("This function must be implemented.");
 	}
 }
