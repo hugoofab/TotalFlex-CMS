@@ -3,4 +3,5 @@ A flexible configurable saving time CMS system to be used in almost every projec
 
 # Requirements
 - PHP >= 5.3.0
-- PHP SQLite
+- PHP PDO SQLite
+- PHP PDO Driver specific to your application database

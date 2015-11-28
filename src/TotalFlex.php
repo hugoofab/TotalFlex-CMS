@@ -65,7 +65,8 @@ class TotalFlex {
 	 * @return int Database version
 	 */
 	public function getDbVersion() {
-		$versionStmt = $this->_configDb->from('config')->select('value')->where('key', 'version');
+		$configTable = $this->_configDbPreffix . 'config';
+		$versionStmt = $this->_configDb->from($configTable)->select('value')->where('key', 'version');
 		$version = $versionStmt->fetch();
 
 		if ($version == null) {
@@ -82,14 +83,14 @@ class TotalFlex {
 		// Base configuration table
 		$configTable = $this->_configDbPreffix . 'config';
 		$this->_configDb->getPdo()->query("
-			CREATE TABLE IF NOT EXISTS $configTable(
+			CREATE TABLE IF NOT EXISTS $configTable (
 				key TEXT, value TEXT
 			)"
 		);
-		
+
 		// Total Flex version
 		$version = $this->getDbVersion();
-
+		
 		// Verify and execute necessary migrations
 		$migrations = $this->_getMigrationsFromVersion($version);
 		foreach ($migrations as $migrationClass) {
@@ -103,7 +104,7 @@ class TotalFlex {
 				break;
 			}
 
-			$reflection = new \ReflectionClass($classWithNamespace);
+			$reflection = new \ReflectionClass($migrationClass);
 			$migrationVersion = (int)$reflection->getConstant('VERSION');
 			$this->_updateDatabaseVersionTo($migrationVersion);
 		}
@@ -116,14 +117,10 @@ class TotalFlex {
 	 */
 	protected function _updateDatabaseVersionTo($newVersion) {
 		$configTable = $this->_configDbPreffix . 'config';
-
-		$this->_configDb
-			->update($configTable)
-			->set([
-				'value' => $newVersion
-			])
-			->where('key', 'version')
-			->execute();
+		$this->_configDb->getPdo()->query("
+			INSERT OR REPLACE INTO $configTable
+			(key, value) VALUES ('version', $newVersion);
+		");
 	}
 
 	/**

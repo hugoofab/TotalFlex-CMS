@@ -33,9 +33,12 @@ Be sure your migration will work in SQLite, it's the TotalFlex configuration dat
 
 namespace TotalFlex\Migrations;
 
+// Extending MigrationBase
 class Migration2 extends MigrationBase {
+	// Version constante
 	const VERSION = 2;
 
+	// Execution method
 	public function execute($db) {
 		// Drops the table `sample` because its not necessary anymore
 		$sample = $this->getTablename('sample');
@@ -47,7 +50,7 @@ class Migration2 extends MigrationBase {
 			`id_newtable` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 			`column_1` TEXT NOT NULL,
 			`column_2` TEXT NOT NULL
-		);")
+		);");
 
 		// Migrate data from `oldtable` to `newtable` using FluentPDO
 		$oldtable = $this->getTablename('oldtable');
@@ -60,7 +63,7 @@ class Migration2 extends MigrationBase {
 				'column_2' => strrev($oldTableRow['column_with_bad_data'])
 			];
 
-			$query = $fpdo->insertInto($newtable)->values($values)->execute();
+			$query = $db->insertInto($newtable)->values($values)->execute();
 		}
 	}
 }
