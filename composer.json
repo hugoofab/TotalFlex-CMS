@@ -20,6 +20,5 @@
     },
     "minimum-stability": "dev",
     "require": {
-        "lichtner/fluentpdo": "dev-master"
     }
 }
