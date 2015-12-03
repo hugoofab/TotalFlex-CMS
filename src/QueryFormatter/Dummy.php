@@ -5,9 +5,14 @@ use TotalFlex\IQueryFormatter;
 
 class Dummy implements IQueryFormatter {
 	/**
-	 * @var array The form action
+	 * @var string $_action The form action
 	 */
 	private $_action;
+
+	/**
+	 * @var string $_method The form method
+	 */
+	private $_method;
 
 	/**
 	 * @var array The fields to include in the actual formatting
@@ -17,8 +22,9 @@ class Dummy implements IQueryFormatter {
 	/**
 	 * @inheritdoc
 	 */
-	public function __construct($action) {
+	public function __construct($action, $method) {
 		$this->_action = $action;
+		$this->_method = $method;
 		$this->_fields = [];
 	}
 
@@ -27,7 +33,7 @@ class Dummy implements IQueryFormatter {
 	 */
 	public function generate() {
 		return 
-			"- Create form with action pointing to " . $this->_action . "\n" .
+			"- Create a " . $this->_method . " form with action pointing to " . $this->_action . "\n" .
 			"\t" . implode("\n\t", $this->_fields)
 		;
 	}

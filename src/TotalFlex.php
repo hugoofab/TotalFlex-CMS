@@ -5,6 +5,8 @@ use TotalFlex\Exception\AlreadyRegisteredTable;
 use TotalFlex\Exception\InvalidField;
 use TotalFlex\Exception\InvalidContext;
 use TotalFlex\Exception\NotRegisteredTable;
+use TotalFlex\Support\RequestParameters;
+use \FluentPDO;
 
 class TotalFlex {
 	/**
@@ -34,6 +36,11 @@ class TotalFlex {
 	private $_callbackUrl;
 
 	/**
+	 * @var string $_method The method of the forms
+	 */
+	private $_method;
+
+	/**
 	 * @var \PDO $_targetDb Target database, with business entities.
 	 */
 	private $_targetDb;
@@ -48,13 +55,14 @@ class TotalFlex {
 	 * Constructs the CRUDManager
 	 *
 	 * @param string $callbackUrl Callback URL to CRUD forms
+	 * @param string $method The form method
 	 * @param string $dsn Datasource name
 	 * @param string $user (Optional) Username to the database
 	 * @param string $pass (Optional) Password to the database
 	 * @param array $opts (Optional) Associative array with driver-specific options
 	 * @throws \RuntimeException
 	 */
-	public function __construct(/** $callbackUrl, $dsn, $user, $pass, $opts **/) {
+	public function __construct(/** $callbackUrl, $method, $dsn, $user, $pass, $opts **/) {
 		/*
 		 * Initializes the DB Connection
 		 */
@@ -63,17 +71,18 @@ class TotalFlex {
 		$argv = func_get_args();
 
 		switch ($argc) {
-			case 2:
 			case 3:
 			case 4:
 			case 5:
+			case 6:
 				$this->_callbackUrl = array_shift($argv);
+				$this->_method = array_shift($argv);
 				$reflection = new \ReflectionClass('\PDO');
 				$this->_targetDb = $reflection->newInstanceArgs($argv);
 				break;
 
 			default:
-				throw new \RuntimeException('Unexpected number of arguments (' . $argc . '). Expected 2..5.');
+				throw new \RuntimeException('Unexpected number of arguments (' . $argc . '). Expected 3..6.');
 		}
 
 		/*
@@ -131,29 +140,30 @@ class TotalFlex {
 	 * @param string $tableName The table
 	 * @param int $context The context to generate
 	 * @param IQueryFormatter $formatter (Optional) Formatter to output data
+	 * @param boolean $includeContext (Optional) Whether or not to include context and entity hidden fields
 	 * @return mixed Generated fields
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
-	public function generate($tableName, $context, $formatter = 'TotalFlex\QueryFormatter\Dummy') {
+	public function generate($tableName, $context, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 		switch ($context) {
 			case self::CtxNone:
 				throw new InvalidContext("CtxNone");
 				break;
 
 			case self::CtxCreate:
-				return $this->generateCreateContext($tableName, $formatter);
+				return $this->generateCreateContext($tableName, $formatter, $includeContext);
 				break;
 
 			case self::CtxRead:
-				return $this->generateReadContext($tableName, $formatter);
+				return $this->generateReadContext($tableName, $formatter, $includeContext);
 				break;
 
 			case self::CtxUpdate:
-				return $this->generateUpdateContext($tableName, $formatter);
+				return $this->generateUpdateContext($tableName, $formatter, $includeContext);
 				break;
 
 			case self::CtxDelete:
-				return $this->generateDeleteContext($tableName, $formatter);
+				return $this->generateDeleteContext($tableName, $formatter, $includeContext);
 				break;
 
 			default: 
@@ -168,13 +178,19 @@ class TotalFlex {
 	 * @throws \RuntimeException
 	 */
 	public function handleCallback() {
-		if (!isset($_POST['totalflex'])) {
+		$requestParameters = new RequestParameters();
+
+		
+		if (!$requestParameters->received('totalflex')) {
 			throw new \RuntimeException("Expected totalflex keys to be in the request.");
 		}
 
-		// @todo: Necessary sanitize?
-		$entity = $_POST['totalflex']['entity'];
-		$context = $_POST['totalflex']['ctx'];
+		/**
+		 * @todo: Necessary sanitize?
+		 */
+		$totalFlexData = $requestParameters->get('totalflex');
+		$entity = $totalFlexData['entity'];
+		$context = $totalFlexData['ctx'];
 
 		switch ($context) {
 			case self::CtxNone:
@@ -207,14 +223,18 @@ class TotalFlex {
 	 *
 	 * @param string $tableName The table name
 	 * @param IQueryFormatter $formatter (Optional) Formatter to output data
+	 * @param boolean $includeContext (Optional) Whether or not to include context and entity hidden fields
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
-	public function generateCreateContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy') {
+	public function generateCreateContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 		$table = $this->_getTable($tableName);
 		
-		$formatterInst = new $formatter($this->_callbackUrl);
-		$formatterInst->addField('totalflex[entity]', '', 'hidden', $tableName);
-		$formatterInst->addField('totalflex[ctx]', '', 'hidden', self::CtxCreate);
+		$formatterInst = new $formatter($this->_callbackUrl, $this->_method);
+
+		if ($includeContext) {
+			$formatterInst->addField('totalflex[entity]', '', 'hidden', $tableName);
+			$formatterInst->addField('totalflex[ctx]', '', 'hidden', self::CtxCreate);
+		}
 
 		foreach ($table->getFields() as $field) {
 			if (!$field->applyToContext(self::CtxCreate)) {
@@ -245,7 +265,8 @@ class TotalFlex {
 	 */
 	public function handleCreateCallback($tableName) {
 		$table = $this->_getTable($tableName);
-		
+		$requestParameters = new RequestParameters();
+
 		$creationValues = [];
 		foreach ($table->getFields() as $field) {
 			if (!$field->applyToContext(self::CtxCreate)) {
@@ -253,8 +274,8 @@ class TotalFlex {
 			}
 
 			$columnName = $field->getColumn();
-
-			if (!isset($_POST[$columnName])) {
+			
+			if (!$requestParameters->received($columnName)) {
 				/**
 				 * @todo: Add messaging system
 				 */
@@ -263,31 +284,30 @@ class TotalFlex {
 				return false;
 			}
 
-			/**
-			 * @todo Sanitize? (Will be passed by binding to PDO)
-			 */
-			$value = $_POST[$columnName];
+			$value = $requestParameters->get($columnName);
 
 			if ($field->validate($value)) {
 				$creationValues[$columnName] = $value;
 			} else {
-				print_r("INVALID VALUE");
+				print_r("Invalid value to field `$columnName`");
 				return false;
 			}
 		}
 		
 		try {
-			/**
-			 * @todo Initialize transaction
-			 * @todo Execute pre-creation script
-			 * @todo Insert $creationValues into $tableName
-			 * @todo Execute post-creation script
-			 */	
+			$this->_targetDb->beginTransaction();
+			$table->executePreCreationCallback($creationValues);
+			
+			$fluentDb = new FluentPDO($this->_targetDb);
+			$fluentDb
+				->insertInto($table->getName())
+				->values($creationValues)
+				->execute();
+			
+			$table->executePostCreationCallback($creationValues);
+			$this->_targetDb->commit();
 		} catch (\Exception $e) {
-			/**
-			 * @todo Rollback
-			 */	
-
+			$this->_targetDb->rollBack();
 			return false;
 		}
 		
@@ -300,9 +320,10 @@ class TotalFlex {
 	 *
 	 * @param string $tableName The table name
 	 * @param IQueryFormatter $formatter (Optional) Formatter to output data
+	 * @param boolean $includeContext (Optional) Whether or not to include context and entity hidden fields
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
-	public function generateReadContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy') {
+	public function generateReadContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 		$table = $this->_getTable($tableName);
 
 		/** 
@@ -327,9 +348,10 @@ class TotalFlex {
 	 *
 	 * @param string $tableName The table name
 	 * @param IQueryFormatter $formatter (Optional) Formatter to output data
+	 * @param boolean $includeContext (Optional) Whether or not to include context and entity hidden fields
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
-	public function generateUpdateContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy') {
+	public function generateUpdateContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 		$table = $this->_getTable($tableName);
 
 		/** 
@@ -354,9 +376,10 @@ class TotalFlex {
 	 *
 	 * @param string $tableName The table name
 	 * @param IQueryFormatter $formatter (Optional) Formatter to output data
+	 * @param boolean $includeContext (Optional) Whether or not to include context and entity hidden fields
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
-	public function generateDeleteContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy') {
+	public function generateDeleteContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 		$table = $this->_getTable($tableName);
 
 		/** 

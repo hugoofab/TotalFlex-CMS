@@ -15,7 +15,7 @@ use TotalFlex\Rule\Length;
  * target application.
  *************************************************************/
 $conn = new PDO('sqlite:business.db3');
-$conn->query("CREATE TABLE IF NOT EXIST business_entity (id_be INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
+$conn->query("CREATE TABLE IF NOT EXISTS business_entity (id_be INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
 $conn = null;
 
 /************************************************************
@@ -27,8 +27,8 @@ $conn = null;
  * one line to bootstrap it all.
  *************************************************************/
 
-// Initializing total flex with callback url and the target database connection info
-$totalFlex = new TotalFlex('index.php?callback=1', 'sqlite:business.db3');
+// Initializing Total Flex with callback url/method and the target database connection info
+$totalFlex = new TotalFlex('index.php?callback=1', 'POST', 'sqlite:business.db3');
 
 // Registering table `business_entity` with its fields
 $totalFlex->registerTable('business_entity')
@@ -43,7 +43,18 @@ $totalFlex->registerTable('business_entity')
 		->setLabel('Name')
 		->setContexts(TotalFlex::CtxCreate|TotalFlex::CtxRead|TotalFlex::CtxUpdate)
 		->addRule(new Required())
-		->addRule(new Length(10, 20));
+		->addRule(new Length(10, 20))
+		->then()
+	// PRE INSERT CALLBACK
+	->setPreCreationCallback(function($creationValues) {
+		print_r("Inserting values into database: ");
+		print_r($creationValues);
+	})
+	// POST INSERT CALLBACK
+	->setPostCreationCallback(function($creationValues) {
+		print_r("Inserted values into database: ");
+		print_r($creationValues);
+	});
 
 
 /************************************************************
@@ -52,8 +63,12 @@ $totalFlex->registerTable('business_entity')
  * This is the real code to generate some form with TotalFlex
  * AND handle the return. 
  *************************************************************/
-if (!isset($_GET['callback'])) {
+$showForm = true;
+
+if (isset($_GET['callback'])) {
+	$showForm = !$totalFlex->handleCallback();
+}
+
+if ($showForm) {
 	echo $totalFlex->generate('business_entity', TotalFlex::CtxCreate, 'TotalFlex\QueryFormatter\Html');
-} else {
-	$totalFlex->handleCallback();
 }

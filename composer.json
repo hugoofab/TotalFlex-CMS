@@ -20,5 +20,6 @@
     },
     "minimum-stability": "dev",
     "require": {
+        "lichtner/fluentpdo": "^1.0"
     }
 }
