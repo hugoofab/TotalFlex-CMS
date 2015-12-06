@@ -124,14 +124,18 @@ class TotalFlex {
 	 * @throws TotalFlex\Exception\AlreadyRegisteredTable
 	 * @throws TotalFlex\Exception\InvalidField
 	 */
-	public function registerTable($name) {
-		if (isset($this->_tables[$name])) {
-			throw new AlreadyRegisteredTable($name);
+	public function registerTable($name, $alias = null) {
+		if (is_null($alias)) {
+			$alias = $name;
+		}
+
+		if (isset($this->_tables[$alias])) {
+			throw new AlreadyRegisteredTable($alias);
 		}
 
 		// Register the table and return it
-		$this->_tables[$name] = new Table($name);
-		return $this->_tables[$name];
+		$this->_tables[$alias] = new Table($name);
+		return $this->_tables[$alias];
 	}
 
 	/**

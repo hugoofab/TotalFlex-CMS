@@ -56,6 +56,32 @@ $totalFlex->registerTable('business_entity')
 		print_r($creationValues);
 	});
 
+// Registering table `business_entity` with its fields
+$totalFlex->registerTable('business_entity', 'business_entity_alias')
+	// FIELD id_be
+	->addField('id_be')
+		->setLabel('Identifier')
+		->setPrimaryKey(true)
+		->setContexts(TotalFlex::CtxRead)
+		->then()
+	// FIELD name
+	->addField('name')
+		->setLabel('Name')
+		->setContexts(TotalFlex::CtxCreate|TotalFlex::CtxRead|TotalFlex::CtxUpdate)
+		->addRule(new Required())
+		->addRule(new Length(10, 20))
+		->then()
+	// PRE INSERT CALLBACK
+	->setPreCreationCallback(function($creationValues) {
+		print_r("Inserting values into database: ");
+		print_r($creationValues);
+	})
+	// POST INSERT CALLBACK
+	->setPostCreationCallback(function($creationValues) {
+		print_r("Inserted values into database: ");
+		print_r($creationValues);
+	});
+
 
 /************************************************************
  * TotalFlex Use Case
@@ -70,5 +96,5 @@ if (isset($_GET['callback'])) {
 }
 
 if ($showForm) {
-	echo $totalFlex->generate('business_entity', TotalFlex::CtxCreate, 'TotalFlex\QueryFormatter\Html');
+	echo $totalFlex->generate('business_entity_alias', TotalFlex::CtxCreate, 'TotalFlex\QueryFormatter\Html');
 }
