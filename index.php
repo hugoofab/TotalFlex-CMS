@@ -2,7 +2,7 @@
 
 require 'vendor/autoload.php';
 
-use TotalFlex\TotalFlex;
+use TotalFlex\TotalFlex as TotalFlex;
 use TotalFlex\Field;
 use TotalFlex\Rule\Required;
 use TotalFlex\Rule\Length;
@@ -33,14 +33,12 @@ $totalFlex = new TotalFlex('index.php?callback=1', 'POST', 'sqlite:business.db3'
 // Registering table `business_entity` with its fields
 $totalFlex->registerTable('business_entity')
 	// FIELD id_be
-	->addField('id_be')
-		->setLabel('Identifier')
-		->setPrimaryKey(true)
+	->addField('id_be','Identifier')
+		->setPrimaryKey()
 		->setContexts(TotalFlex::CtxRead)
 		->then()
 	// FIELD name
-	->addField('name')
-		->setLabel('Name')
+	->addField('name','Abcd')
 		->setContexts(TotalFlex::CtxCreate|TotalFlex::CtxRead|TotalFlex::CtxUpdate)
 		->addRule(new Required())
 		->addRule(new Length(10, 20))

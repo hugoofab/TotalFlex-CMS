@@ -151,7 +151,7 @@ class Field {
      * @param boolean Is a primary key
      * @return self
      */
-    public function setPrimaryKey($primaryKey) {
+    public function setPrimaryKey($primaryKey = true) {
         $this->_primaryKey = $primaryKey;
         return $this;
     }
