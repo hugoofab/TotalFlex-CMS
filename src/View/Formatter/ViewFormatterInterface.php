@@ -1,8 +1,9 @@
 <?php
 
-namespace TotalFlex;
+namespace TotalFlex\View\Formatter;
 
-interface IQueryFormatter {
+interface ViewFormatterInterface {
+	
 	/**
 	 * @var MessageInfo Info message type constant
 	 */
@@ -20,20 +21,13 @@ interface IQueryFormatter {
 	 */
 	const MessageError		= 4;
 
-	/**
-	 * Initializes the formatter
-	 *
-	 * @param string $action The form action
-	 * @param string $method The form method
-	 */
-	public function __construct($action, $method);
 
 	/**
 	 * Generate the output
 	 *
 	 * @return string Formatted output
 	 */
-	public function generate();
+	public static function generate ( \TotalFlex\View $View , $context );
 
 	/**
 	 * Adds a field to the form
@@ -43,7 +37,7 @@ interface IQueryFormatter {
 	 * @param string $type HTML Input Type
 	 * @param string $value (Optional) Pre-filled value. Defaults to empty.
 	 */
-	public function addField($id, $label, $type, $value = '');
+	// public function addField ( $id, $label, $type, $value = '');
 
 	/**
 	 * Adds a message to the query
@@ -52,5 +46,6 @@ interface IQueryFormatter {
 	 * @param int $type Message type.
 	 * @see IQueryFormatter::Message* consts.
 	 */
-	public function addMessage($message, $type);
+	// public function addMessage($message, $type);
+
 }

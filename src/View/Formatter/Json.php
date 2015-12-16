@@ -3,7 +3,7 @@
 namespace TotalFlex\QueryFormatter;
 use TotalFlex\IQueryFormatter;
 
-class Html implements IQueryFormatter {
+class Json implements IQueryFormatter {
 	/**
 	 * @var string $_action The form action
 	 */
@@ -32,7 +32,8 @@ class Html implements IQueryFormatter {
 	 * @inheritdoc
 	 */
 	public function generate() {
-		$form = '<form method="' . $this->_method . '" action="' . $this->_action . '">';
+
+		$form = '<form method="' . $this->_method . '" action="' . $this->_action . '">'."\n\n";
 		foreach ($this->_queue as $queueItem) {
 			switch ($queueItem[0]) {
 				case 'field':
@@ -52,9 +53,11 @@ class Html implements IQueryFormatter {
 					break;
 			}
 		}
+		
 		$form .= '</form>';
 
 		return $form;
+
 	}
 
 	/**
@@ -84,10 +87,10 @@ class Html implements IQueryFormatter {
 		$output = "";
 		
 		if (!empty($label)) {
-			$output .= "<label for=\"$id\">$label</label>";
+			$output .= "\t<label for=\"$id\">$label</label><br>\n";
 		}
 
-		$output .= "<input type=\"$type\" name=\"$id\" id=\"$id\" value=\"$value\"/>";
+		$output .= "\t<input type=\"$type\" name=\"$id\" id=\"$id\" value=\"$value\"/><br>\n\n";
 
 		return $output;
 	}

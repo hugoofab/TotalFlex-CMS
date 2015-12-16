@@ -19,16 +19,9 @@ use TotalFlex\Field;
  * here to show the infraestructure expected from the 
  * target application.
  *************************************************************/
-// $pdo = new PDO('sqlite:business.db3');
-// $conn = new PDO('mysqli:business.db3');
-// $conn->query("CREATE TABLE IF NOT EXISTS business_entity (id_be INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
-// $pdo = new FluentPDOPDO("mysql:dbname=fazerbrasil", "root", "");
-$pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
-// $pdo->query("INSERT INTO business_entity( name ) VALUES ( 'asdfasdf' )");
-// $pdo = new PDO("mysql:host=localhost;dbname=fazerbrasil", "root", "");
-// pr($pdo);
-
-// $conn = null;
+$conn = new PDO('sqlite:business.db3');
+$conn->query("CREATE TABLE IF NOT EXISTS business_entity (id_be INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
+$conn = null;
 
 /************************************************************
  * Bootstraping TotalFlex
@@ -43,8 +36,8 @@ $pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 // 'index.php?callback=1', 'POST', 'sqlite:business.db3'
 
 // 10*40*
-
-// $result = $pdo->query("SELECT * FROM business_entity");
+// $pdo = new FluentPDOPDO("mysql:dbname=fazerbrasil", "root", "");
+$pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 
 $TotalFlex = new TotalFlex ( $pdo );
 
@@ -71,34 +64,48 @@ $TotalFlex = new TotalFlex ( $pdo );
 <?php
 
 // Registering table `business_entity` with its fields
-$TotalFlex->registerView('business_entity')
+$TotalFlex->registerView('business_entity','business_entity_alias')
 
 	// set default contexts to be applyed to all fields from now on
+	->setContexts(TotalFlex::CtxCreate)
 
-	->setContexts(TotalFlex::CtxRead|TotalFlex::CtxUpdate)
-	->addField( Field\Text::getInstance ( 'id_news_label' , 'ID' ) )->setPrimaryKey()
+	->addField('id_be','ID')
+		->setPrimaryKey()
 
-	->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate|TotalFlex::CtxRead)
-	->addField( Field\Text::getInstance ( 'label' , 'Label' ) )
+	->addField( new Field\Text ( 'name' , 'Name (com new)' )  )
+
+	->addField('name','Name')
+		->addRule(new Rule\Required())
+		->addRule(new Rule\Length(10, 20))
+
+	->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate)
+
+	->addField('image','Image')
+	
+	->addField('url','URL')
+		->setFieldTemplate ( "\tHTTP://<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n" )
+
+	->addField('short_description','Descrição curta')
+	
+	->addField('description','Descrição')
+		->setFieldTemplate ( "\t<textarea style=\"width:100%;height:200px;\" class=\"form-control\" name=\"__name__\" id=\"__id__\" >__value__</textarea><br>\n\n" )
 
 	->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
 
-	->setTable ( "news_label" )
-
-;
-
-$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
-
-echo \TotalFlex\Feedback::dumpMessages();
-
-prs($pdo->query("SELECT * FROM news_label")->fetchAll());
-// pr($consulta->fetchAll());
+	->setTable ( "business_entity" )
 
 
-// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
-// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxRead ) ;
+	// PRE INSERT CALLBACK
+	->setPreCreationCallback(function($creationValues) {
+		print_r("Inserting values into database: ");
+		print_r($creationValues);
+	})
 
-// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate|TotalFlex::CtxRead|TotalFlex::CtxCreate ) ;
+	// POST INSERT CALLBACK
+	->setPostCreationCallback(function($creationValues) {
+		print_r("Inserted values into database: ");
+		print_r($creationValues);
+	});
 
 /************************************************************
  * TotalFlex Use Case
@@ -126,7 +133,7 @@ prs($pdo->query("SELECT * FROM news_label")->fetchAll());
 	
 	<div class="col-md-6">
 		
-		<?=\TotalFlex\View\Formatter\Html::generate ( $TotalFlex->getView ( 'business_entity' ) , TotalFlex::CtxCreate )?>
+		<?=\TotalFlex\View\Formatter\Html::generate ( $TotalFlex->getView ( 'business_entity_alias' ) , TotalFlex::CtxCreate )?>
 
 	</div>
 
