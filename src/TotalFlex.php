@@ -155,6 +155,7 @@ class TotalFlex {
 				if ( $Field->isPrimaryKey() ) continue ;
 				$Field->setValue('');
 			}
+			// need redirect here to avoid user repost
 		} else {
 			$errorInfo = $this->_targetDb->errorInfo();
 			// pre($this->_targetDb->errorCode());

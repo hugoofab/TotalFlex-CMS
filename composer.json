@@ -1,7 +1,8 @@
 {
-    "name": "total-flex-cms/total-flex-cms",
+    "name": "hugoofab/totalflex-cms",
     "description": "A flexible configurable saving time CMS system to be used in almost every project you do.",
     "type": "library",
+    "version" : "1.0.0-beta",    
     "license": "BSD-3-Clause",
     "authors": [
         {
