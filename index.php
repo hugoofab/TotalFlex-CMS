@@ -85,6 +85,15 @@ $TotalFlex->registerView('business_entity')
 
 	->setTable ( "news_label" )
 
+	// ->WHERE ( 'fieldid = X' )
+	// para criar o contexto de editar, precisa encontrar a tupla que desejamos.
+
+	// deve gerar uma excessão caso encontre mais que uma tupla?
+	// possivelmente geraria uma excessão mas permitiria com um metodo a edição multipla, 
+	// 		assim o padrão é não aceitar, mas se o usuário declarar explicitamente que deseja alterar multiplas tuplas, que assim seja.
+
+	// caso não encontre nenhuma tupla, podemos gerar uma exce
+
 ;
 
 $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
