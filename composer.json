@@ -1,6 +1,6 @@
 {
     "autoload": {
-        "psr-4": {"TotalFlex\\": "./"}
+        "psr-4": {"TotalFlex\\": "./src"}
     },
     "name": "hugoofab/TotalFlexCMS",
     "version" : "1.0.0-beta",
