@@ -16,14 +16,14 @@ use TotalFlex\Field;
  * Creating fake business database
  * ---------------------------------------------------------
  * It's not supposed to be anywhere in the code. Creating
- * here to show the infraestructure expected from the 
+ * here to show the infraestructure expected from the
  * target application.
  *************************************************************/
 // $pdo = new PDO('sqlite:business.db3');
 // $conn = new PDO('mysqli:business.db3');
 // $conn->query("CREATE TABLE IF NOT EXISTS business_entity (id_be INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
 // $pdo = new FluentPDOPDO("mysql:dbname=fazerbrasil", "root", "");
-$pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
+$pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
 // $pdo->query("INSERT INTO business_entity( name ) VALUES ( 'asdfasdf' )");
 // $pdo = new PDO("mysql:host=localhost;dbname=fazerbrasil", "root", "");
 // pr($pdo);
@@ -33,7 +33,7 @@ $pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 /************************************************************
  * Bootstraping TotalFlex
  * ---------------------------------------------------------
- * This code is needed every initialization of the 
+ * This code is needed every initialization of the
  * application. There is, in te future, ideas to make this
  * part of one simple SQLite database that will only need
  * one line to bootstrap it all.
@@ -60,7 +60,7 @@ $TotalFlex = new TotalFlex ( $pdo );
 	<meta charset="UTF-8">
 	<title>Document</title>
 	<link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet" />
-	
+
 	<style>
 		*,html,body{font-size: 1em;}
 	</style>
@@ -104,7 +104,7 @@ prs($pdo->query("SELECT * FROM news_label")->fetchAll());
  * TotalFlex Use Case
  * ---------------------------------------------------------
  * This is the real code to generate some form with TotalFlex
- * AND handle the return. 
+ * AND handle the return.
  *************************************************************/
 // $showForm = true;
 
@@ -123,16 +123,16 @@ prs($pdo->query("SELECT * FROM news_label")->fetchAll());
 <h3>Saida</h3>
 
 <div class="row">
-	
+
 	<div class="col-md-6">
-		
+
 		<?=\TotalFlex\View\Formatter\Html::generate ( $TotalFlex->getView ( 'business_entity' ) , TotalFlex::CtxCreate )?>
 
 	</div>
 
 </div>
 
-	
+
 
 </body>
 </html>
