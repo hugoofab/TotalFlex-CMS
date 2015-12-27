@@ -78,11 +78,27 @@ class Html extends ViewFormatterAbstract implements ViewFormatterInterface {
 			}
 		}
 
+		if ( $context === \TotalFlex\TotalFlex::CtxUpdate ) {
+			// precisa adicionar o primary key
+			// precisa também de um campo de proteção
+			$primaryKeyFieldList = $View->getPrimaryKeyFields();
+			$hash = sha1 ( serialize ( $primaryKeyFieldList ) . "wYWZzcjM5TMidzN0QWOiljZhRDMwUTNkhDNwUDN0ETMxEDMwMDOygTZihTO5IDN2QGM2QWZyYTZmZ" );
+			$form .= "<input type=\"hidden\" name=\"TFFields[".$View->getName()."][$context][validation_hash]\" value=\"$hash\" />\n" ;
+			foreach ( $primaryKeyFieldList as $pkField ) {
+				$form .= "<input type=\"hidden\" name=\"TFFields[".$View->getName()."][$context][fields][".$pkField->getColumn()."]\" value=\"".$pkField->getValue()."\" />\n" ;
+				// $form .= $this->generateField ( $pkField , $context );
+			}
+
+		}
+
 		$form .= $this->_templateCollection['form']['end'];
 
 		return $form;
 
 	}
+
+
+
 
 	/**
 	 * @inheritdoc

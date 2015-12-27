@@ -30,9 +30,10 @@ use TotalFlex\Field;
 
 // macbook
 // $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
+$pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 
 // imac
-$pdo = new PDO("mysql:dbname=test", "root", "");
+// $pdo = new PDO("mysql:dbname=test", "root", "");
 
 
 /************************************************************
@@ -80,7 +81,7 @@ $TotalFlex->registerView('business_entity')
 
 	// set default contexts to be applyed to all fields from now on
 
-	->setContexts(TotalFlex::CtxRead|TotalFlex::CtxUpdate)
+	->setContexts(TotalFlex::CtxRead)
 	->addField( Field\Text::getInstance ( 'id_news_label' , 'ID' ) )->setPrimaryKey()
 
 	->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate|TotalFlex::CtxRead)
@@ -88,7 +89,7 @@ $TotalFlex->registerView('business_entity')
 
 	->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
 
-	->where ( "id_news_label = 2" )
+	->where ( "id_news_label = 1" )
 
 	->setTable ( "news_label" )
 

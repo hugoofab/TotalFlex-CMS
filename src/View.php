@@ -201,6 +201,20 @@ class View {
         return null;
     }
 
+    public function getPrimaryKeyFields ( ) {
+
+    	$output = array ( );
+    	foreach ( $this->_fields as $Field ) {
+    		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+    		if ( $Field->isPrimaryKey ( ) ) {
+    			$output[] = $Field;
+    		}
+    	}
+
+    	return $output ;
+
+    }
+
     /**
      * Add a field to the View
      *
