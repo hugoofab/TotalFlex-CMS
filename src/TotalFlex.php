@@ -50,7 +50,7 @@ class TotalFlex {
 	 */
 	private $_views;
 
-	
+
 	/**
 	 * Constructs the CRUDManager
 	 *
@@ -136,7 +136,7 @@ class TotalFlex {
 		$myContext = TotalFlex::CtxCreate ;
 		$view      = $this->getView ( $viewName );
 		if ( empty ( $_POST['TFFields'][$viewName][$myContext] ) ) return ;
-		
+
 		$fieldList = $view->getFieldsFromContext ( $myContext );
 
 		$queryFieldList = array ( );
@@ -164,7 +164,67 @@ class TotalFlex {
 
     }
 
+    /**
+     * get the configuration and set data to field list
+     */
+    public function setData ( &$View ) {
 
+		// check if we have at least one primary key field
+		// if not, throw an exception
+		// but sometimes we`ll need to hide the primary key field, because we don't want to show it
+
+    	$query = $View->queryBuilder()->getUpdateGetQuery ( $View->getFields() );
+
+// executar a query e alimentar os valores dos fields
+
+    	$statement = $this->_targetDb->prepare ( $query );
+    	if ( !$statement->execute() ) throw new Exception ( $statement->errorInfo() );
+    	$result = $statement->fetchAll ( \PDO::FETCH_ASSOC );
+
+    	if ( count ( $result ) > 1 ) throw new \Exception ( "Result can't be more than one row" );
+    	if ( !count ( $result ) ) throw new \Exception ( "the data you want does not exist" );
+
+    	$result = array_pop ( $result );
+
+    	$fieldList = $View->getFields();
+
+    	foreach ( $fieldList as &$Field ) {
+    		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+    		$Field->setValue ( $result[$Field->getColumn()] );
+    	}
+
+    }
+
+    /**
+     * Generate a form or a grid for a given view to an given context using a given Formatter
+     * @param  string $viewName  view name as string
+     * @param  TotalFlex context $context   just one context at a time by call to this method
+     * @param  string|object $Formatter formatter instance or a string with the name of the formatter we want to use
+     * @return [type]            the output given by the formatter
+     *   third parameter can be a string with the class name of TotalFlex\View\Formatter\FORMATTER_CLASS_NAME
+     *   or can be an instance of the refered object. In case of it be an instance, you can instanciate the object and
+     *   configure it as you want, for example: passing as a instance parameter the array of templates for html elements.
+     *   if you don't need to configure it, you can pass just a string with the formatter you want to use
+     */
+    public function generate ( $viewName , $context , $Formatter ) {
+
+    	if ( !in_array ( $context , array ( TotalFlex::CtxNone , TotalFlex::CtxCreate , TotalFlex::CtxRead , TotalFlex::CtxUpdate , TotalFlex::CtxDelete ) ) ) throw new Exception\ManyContext ( "Please generate with one context at a time" );
+
+    	if ( gettype ( $Formatter ) === 'string' ) {
+    		$Formatter = '\\TotalFlex\\View\\Formatter\\' . ucfirst ( $Formatter );
+    		$Formatter = new $Formatter();
+    	}
+
+    	$View = $this->getView ( $viewName );
+
+		if ( $context === TotalFlex::CtxUpdate ) {
+			$this->setData($View);
+		}
+
+		// output delivered is responsibility of the formatter object
+    	return $Formatter->generate ( $View , $context );
+
+    }
 
     /**
      * Check if there is a given context group have a specific context
@@ -217,7 +277,7 @@ class TotalFlex {
 		// Register the View and return it
 		$this->_views[$alias] = new View($name);
 		return $this->_views[$alias];
-		
+
 	}
 
 	/**
@@ -252,13 +312,13 @@ class TotalFlex {
 	// 			return $this->generateDeleteContext($tableName, $Formatter, $includeContext);
 	// 			break;
 
-	// 		default: 
+	// 		default:
 	// 			throw new InvalidContext($context);
 	// 	}
 	// }
 
 	/**
-	 * Handles form callback 
+	 * Handles form callback
 	 *
 	 * @return boolean Operation status (success, failed)
 	 * @throws \RuntimeException
@@ -266,7 +326,7 @@ class TotalFlex {
 	// public function handleCallback() {
 
 	// 	$requestParameters = new RequestParameters();
-		
+
 	// 	if (!$requestParameters->received('totalflex')) {
 	// 		throw new \RuntimeException("Expected totalflex keys to be in the request.");
 	// 	}
@@ -299,8 +359,8 @@ class TotalFlex {
 	// 			return $this->handleDeleteCallback($entity);
 	// 			break;
 
-	// 		default: 
-	// 			throw new InvalidContext($context);	
+	// 		default:
+	// 			throw new InvalidContext($context);
 	// 	}
 	// }
 
@@ -315,7 +375,7 @@ class TotalFlex {
 	// public function generateCreateContext($tableName, $Formatter = null , $includeContext = true) {
 
 	// 	$Table = $this->getTable($tableName);
-		
+
 	// 	if ( $Formatter === null ) {
 	// 		// 'TotalFlex\QueryFormatter\Dummy'
 	// 		$Formatter = new TotalFlex\QueryFormatter\Dummy ( );
@@ -340,7 +400,7 @@ class TotalFlex {
 	/**
 	 * Handles callback in the Create context
 	 *
-	 * @param string $tableName The table name 
+	 * @param string $tableName The table name
 	 * @return boolean Operation status (success, failed)
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
@@ -355,7 +415,7 @@ class TotalFlex {
 	// 		}
 
 	// 		$columnName = $field->getColumn();
-			
+
 	// 		if (!$requestParameters->received($columnName)) {
 	// 			/**
 	// 			 * @todo: Add messaging system
@@ -374,24 +434,24 @@ class TotalFlex {
 	// 			return false;
 	// 		}
 	// 	}
-		
+
 	// 	try {
 	// 		$this->_targetDb->beginTransaction();
 	// 		$table->executePreCreationCallback($creationValues);
-			
+
 	// 		$fluentDb = new FluentPDO($this->_targetDb);
 	// 		$fluentDb
 	// 			->insertInto($table->getName())
 	// 			->values($creationValues)
 	// 			->execute();
-			
+
 	// 		$table->executePostCreationCallback($creationValues);
 	// 		$this->_targetDb->commit();
 	// 	} catch (\Exception $e) {
 	// 		$this->_targetDb->rollBack();
 	// 		return false;
 	// 	}
-		
+
 
 	// 	return true;
 	// }
@@ -407,15 +467,15 @@ class TotalFlex {
 	// public function generateReadContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 	// 	$table = $this->getTable($tableName);
 
-	// 	/** 
-	// 	 * @todo 
+	// 	/**
+	// 	 * @todo
 	// 	 */
 	// }
 
 	/**
 	 * Handles callback in the Read context
 	 *
-	 * @param string $tableName The table name 
+	 * @param string $tableName The table name
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
 	// public function handleReadCallback($tableName) {
@@ -435,15 +495,15 @@ class TotalFlex {
 	// public function generateUpdateContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 	// 	$table = $this->getTable($tableName);
 
-	// 	/** 
-	// 	 * @todo 
+	// 	/**
+	// 	 * @todo
 	// 	 */
 	// }
 
 	/**
 	 * Handles callback in the Update context
 	 *
-	 * @param string $tableName The table name 
+	 * @param string $tableName The table name
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
 	// public function handleUpdateCallback($tableName) {
@@ -463,15 +523,15 @@ class TotalFlex {
 	// public function generateDeleteContext($tableName, $formatter = 'TotalFlex\QueryFormatter\Dummy', $includeContext = true) {
 	// 	$table = $this->getTable($tableName);
 
-	// 	/** 
-	// 	 * @todo 
+	// 	/**
+	// 	 * @todo
 	// 	 */
 	// }
 
 	/**
 	 * Handles callback in the Delete context
 	 *
-	 * @param string $tableName The table name 
+	 * @param string $tableName The table name
 	 * @throws TotalFlex\Exception\NotRegisteredTable
 	 */
 	// public function handleDeleteCallback($tableName) {
@@ -491,7 +551,7 @@ class TotalFlex {
 		if (!isset($this->_views[$viewName])) {
 			throw new NotRegisteredView($viewName);
 		}
-		
+
 		return $this->_views[$viewName];
 	}
 

@@ -7,8 +7,9 @@ class QueryBuilder {
 	/**
 	 * @var array used to make from statement
 	 */
-	protected $_queryFrom = [];
-	protected $_queryJoin = [];
+	protected $_queryFrom  = [];
+	protected $_queryJoin  = [];
+	protected $_queryWhere = [];
 
 	public static function getInstance ( ) {
 		return new QueryBuilder();
@@ -20,27 +21,32 @@ class QueryBuilder {
 	}
 
     public function join ( $queryJoin ) {
-        $this->queryJoin[] = " JOIN "       . $queryJoin . " \n" ;
+        $this->_queryJoin[] = " JOIN "       . $queryJoin . " \n" ;
         return $this ;
     }
 
     public function innerJoin ( $queryJoin ) {
-        $this->queryJoin[] = " INNER JOIN " . $queryJoin . " \n" ;
+        $this->_queryJoin[] = " INNER JOIN " . $queryJoin . " \n" ;
         return $this ;
     }
 
     public function leftJoin ( $queryJoin ) {
-        $this->queryJoin[] = " LEFT JOIN "  . $queryJoin . " \n" ;
+        $this->_queryJoin[] = " LEFT JOIN "  . $queryJoin . " \n" ;
         return $this ;
     }
 
     public function rightJoin ( $queryJoin ) {
-        $this->queryJoin[] = " RIGHT JOIN " . $queryJoin . " \n" ;
+        $this->_queryJoin[] = " RIGHT JOIN " . $queryJoin . " \n" ;
         return $this ;
-    }	
+    }
+
+    public function where ( $condition ) {
+		array_push ( $this->_queryWhere , $condition ) ;
+        return $this;
+    }
 
     /**
-     * @todo #25 precisa aplicar regras de segurança etc... 
+     * @todo #25 precisa aplicar regras de segurança etc...
      * [getCreateQuery description]
      * @param  [type] $fieldList [description]
      * @return [type]            [description]
@@ -55,5 +61,25 @@ class QueryBuilder {
     	return $output;
     }
 
+    /**
+     * @todo #25 precisa aplicar regras de segurança etc...
+     * return query used to get the data we want to update
+     * @return string query string
+     */
+    public function getUpdateGetQuery ( Array $fieldList ) {
+
+    	// pr($fieldList);
+    	$fieldSelect = array ( );
+    	foreach ( $fieldList as $Field ) {
+    		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+    		$fieldSelect[] = $Field->getColumn ( );
+    	}
+
+		$query = "SELECT \n\t" . implode ( ", \n\t" , $fieldSelect ) . " \n\nFROM " . implode ( ", \n\t" , $this->_queryFrom ) . "\n" . implode ( "\n\t" , $this->_queryJoin ) ;
+		if ( count ( $this->_queryWhere ) > 0 )	$query .= "\nWHERE " . implode ( " \nAND " , $this->_queryWhere ) ;
+
+		return $query ;
+
+    }
 
 }

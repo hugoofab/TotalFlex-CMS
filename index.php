@@ -23,12 +23,17 @@ use TotalFlex\Field;
 // $conn = new PDO('mysqli:business.db3');
 // $conn->query("CREATE TABLE IF NOT EXISTS business_entity (id_be INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
 // $pdo = new FluentPDOPDO("mysql:dbname=fazerbrasil", "root", "");
-$pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
 // $pdo->query("INSERT INTO business_entity( name ) VALUES ( 'asdfasdf' )");
 // $pdo = new PDO("mysql:host=localhost;dbname=fazerbrasil", "root", "");
 // pr($pdo);
-
 // $conn = null;
+
+// macbook
+// $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
+
+// imac
+$pdo = new PDO("mysql:dbname=test", "root", "");
+
 
 /************************************************************
  * Bootstraping TotalFlex
@@ -49,9 +54,9 @@ $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
 $TotalFlex = new TotalFlex ( $pdo );
 
 // DEFAULT TEMPLATE #################################################################
-	\TotalFlex\View\Formatter\Html::$templateCollection['start']         = "<div class=\"col-md-6 form-group\">\n";
-	\TotalFlex\View\Formatter\Html::$templateCollection['end']           = "</div>\n";
-	\TotalFlex\View\Formatter\Html::$templateCollection['input']['text'] = "\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
+	\TotalFlex\View\Formatter\Html::$defaultTemplateCollection['start']         = "<div class=\"col-md-6 form-group\">\n";
+	\TotalFlex\View\Formatter\Html::$defaultTemplateCollection['end']           = "</div>\n";
+	\TotalFlex\View\Formatter\Html::$defaultTemplateCollection['input']['text'] = "\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
 // ##################################################################################
 
 ?><!DOCTYPE html>
@@ -83,24 +88,27 @@ $TotalFlex->registerView('business_entity')
 
 	->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
 
+	->where ( "id_news_label = 2" )
+
 	->setTable ( "news_label" )
 
 	// ->WHERE ( 'fieldid = X' )
 	// para criar o contexto de editar, precisa encontrar a tupla que desejamos.
 
 	// deve gerar uma excessão caso encontre mais que uma tupla?
-	// possivelmente geraria uma excessão mas permitiria com um metodo a edição multipla, 
+	// possivelmente geraria uma excessão mas permitiria com um metodo a edição multipla,
 	// 		assim o padrão é não aceitar, mas se o usuário declarar explicitamente que deseja alterar multiplas tuplas, que assim seja.
 
 	// caso não encontre nenhuma tupla, podemos gerar uma exce
 
 ;
 
-$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
+// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
+$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
 
 echo \TotalFlex\Feedback::dumpMessages();
 
-prs($pdo->query("SELECT * FROM news_label")->fetchAll());
+// prs($pdo->query("SELECT * FROM news_label")->fetchAll());
 // pr($consulta->fetchAll());
 
 
@@ -135,7 +143,14 @@ prs($pdo->query("SELECT * FROM news_label")->fetchAll());
 
 	<div class="col-md-6">
 
-		<?=\TotalFlex\View\Formatter\Html::generate ( $TotalFlex->getView ( 'business_entity' ) , TotalFlex::CtxCreate )?>
+		<!-- experimental -->
+		<? // =\TotalFlex\View\Formatter\Html::generate ( $TotalFlex->getView ( 'business_entity' ) , TotalFlex::CtxCreate ) ?>
+		<? // =\TotalFlex\View\Formatter\Html::generate ( $TotalFlex->getView ( 'business_entity' ) , TotalFlex::CtxUpdate ) ?>
+
+		<!-- o terceiro parametro pode ser uma string com o nome da classe TotalFlex\View\Formatter ou pode ser uma instancia do próprio formatter -->
+		<!-- no caso de ser uma instancia, você pode instancia-lo e fazer as devidas configurações no formatter antes de injeta-lo no metodo TotalFlex->generate() -->
+		<!-- caso não seja necessário configurar nada no View\Formatter, pode passar só o nome do mesmo como string  -->
+		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
 
 	</div>
 

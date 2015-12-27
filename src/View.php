@@ -42,13 +42,13 @@ class View {
     private $_feedbackMessageList = array (
     	'success' => array (
 			TotalFlex::CtxCreate => "Saved sucessfully" ,
-			TotalFlex::CtxRead   => "" ,  
+			TotalFlex::CtxRead   => "" ,
 			TotalFlex::CtxUpdate => "Updated sucessfully" ,
 			TotalFlex::CtxDelete => "Deleted sucessfully" ,
     	),
     	'error' => array (
 			TotalFlex::CtxCreate => "Could not create" ,
-			TotalFlex::CtxRead   => "" ,  
+			TotalFlex::CtxRead   => "" ,
 			TotalFlex::CtxUpdate => "Could not update" ,
 			TotalFlex::CtxDelete => "Could not delete" ,
     	)
@@ -68,11 +68,11 @@ class View {
     }
 
     public function getForm ( ) {
-    	return $this->_form; 
+    	return $this->_form;
     }
 
     public function setForm ( $form ) {
-    	$this->_form = $form ; 
+    	$this->_form = $form ;
     	return $this ;
     }
 
@@ -236,10 +236,10 @@ class View {
 		if ( is_a ( $Field , '\TotalFlex\Field\File' ) ) {
 			$this->getForm()->setEnctype("multipart/formdata");
 		}
-		
+
 		// append it!
 		$this->_fields[] = $Field ;
-		
+
 		return $this;
     }
 
@@ -311,44 +311,49 @@ class View {
     // public function getTable ( ) {
     // 	return $this->_queryBuilder->from ( $tableName ) ;
     // }
-    
-    /**
-     * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
-     * [setTable description]
-     * @param [type] $tableName [description]
-     */
-    public function innerJoin ( $tableDefinition ) {
-    	$this->_queryBuilder->innerJoin ( $tableName ) ;
-    	return $this ;
-    }    
-    /**
-     * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
-     * [setTable description]
-     * @param [type] $tableName [description]
-     */
-    
-    public function leftJoin ( $tableDefinition ) {
-    	$this->_queryBuilder->leftJoin ( $tableName ) ;
-    	return $this ;
-    }    
 
     /**
      * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
-     * [setTable description]
-     * @param [type] $tableName [description]
+     * @param [type] $tableDefinition [description]
      */
-    public function rightJoin ( $tableDefinition ) {
-    	$this->_queryBuilder->rightJoin ( $tableName ) ;
+    public function innerJoin ( $tableDefinition ) {
+    	$this->_queryBuilder->innerJoin ( $tableDefinition ) ;
     	return $this ;
     }
 
     /**
      * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
-     * [setTable description]
-     * @param [type] $tableName [description]
+     * @param [type] $tableDefinition [description]
+     */
+    public function leftJoin ( $tableDefinition ) {
+    	$this->_queryBuilder->leftJoin ( $tableDefinition ) ;
+    	return $this ;
+    }
+
+    /**
+     * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
+     * @param [type] $tableDefinition [description]
+     */
+    public function rightJoin ( $tableDefinition ) {
+    	$this->_queryBuilder->rightJoin ( $tableDefinition ) ;
+    	return $this ;
+    }
+
+    /**
+     * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
+     * @param [type] $tableDefinition [description]
      */
     public function join ( $tableDefinition ) {
-    	$this->_queryBuilder->join ( $tableName ) ;
+    	$this->_queryBuilder->join ( $tableDefinition ) ;
+    	return $this ;
+    }
+
+    /**
+     * THIS METHOD IS A PIPE TO QUERYBUILDER OBJECT
+     * @param [type] $condition [description]
+     */
+    public function where ( $condition ) {
+    	$this->_queryBuilder->where ( $condition ) ;
     	return $this ;
     }
 

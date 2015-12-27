@@ -3,7 +3,7 @@
 namespace TotalFlex\View\Formatter;
 
 interface ViewFormatterInterface {
-	
+
 	/**
 	 * @var MessageInfo Info message type constant
 	 */
@@ -27,7 +27,7 @@ interface ViewFormatterInterface {
 	 *
 	 * @return string Formatted output
 	 */
-	public static function generate ( \TotalFlex\View $View , $context );
+	public function generate ( \TotalFlex\View $View , $context );
 
 	/**
 	 * Adds a field to the form
