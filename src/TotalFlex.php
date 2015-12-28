@@ -129,13 +129,19 @@ class TotalFlex {
 	 * @param  [type] $contexts one context
 	 * @return [type]          [description]
 	 */
-    public function processPost ( $viewName , $context ) {
+    public function processPost ( $viewName , $context , $callback = null ) {
+
 
     	if ( empty ( $_POST ) ) return ;
-		if ( $this->hasContext ( TotalFlex::CtxCreate , $context ) ) return $this->_processCreate ( $viewName );
-		if ( $this->hasContext ( TotalFlex::CtxDelete , $context ) ) return $this->_processDelete ( $viewName );
-		if ( $this->hasContext ( TotalFlex::CtxUpdate , $context ) ) return $this->_processUpdate ( $viewName );
+		if ( $this->hasContext ( TotalFlex::CtxCreate , $context ) ) $return = $this->_processCreate ( $viewName );
+		if ( $this->hasContext ( TotalFlex::CtxDelete , $context ) ) $return = $this->_processDelete ( $viewName );
+		if ( $this->hasContext ( TotalFlex::CtxUpdate , $context ) ) $return = $this->_processUpdate ( $viewName );
 
+		if ( gettype ( $callback ) === "object" ) {
+			$callback($return);
+		}
+
+		return $return ;
 		// if ( $this->hasContext ( TotalFlex::CtxRead , $context ) ) $this->_processDelete ( $view );
 
 		// TFFields[business_entity][1][fields][name]

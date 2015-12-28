@@ -104,7 +104,7 @@ $TotalFlex->registerView('business_entity')
 
 ;
 
-$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
+$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate , function ( ) { }) ;
 // $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
 
 echo \TotalFlex\Feedback::dumpMessages();
