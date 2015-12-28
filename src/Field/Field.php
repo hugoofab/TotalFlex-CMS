@@ -2,7 +2,7 @@
 
 namespace TotalFlex\Field;
 
-class Field { 
+class Field {
 
 	/**
 	 * @var string Column name
@@ -45,7 +45,7 @@ class Field {
 	private $_value;
 
 	/**
-	 * @var string chave da variavel post 
+	 * @var string chave da variavel post
 	 */
 	private $_postKey;
 
@@ -67,6 +67,8 @@ class Field {
 	 */
 	private $_defaultValue = null ;
 
+	private $_emptyValue = null ;
+
 	public static function getInstance ( $column , $label ) {
 		return new Field ( $column , $label );
 	}
@@ -75,7 +77,7 @@ class Field {
 	 * Constructs the field
 	 *
 	 * @param string $column Field column name
-	 * @param string $label Field label 
+	 * @param string $label Field label
 	 * @throws \InvalidArgumentException
 	 */
 	public function __construct ( $column , $label ) {
@@ -89,6 +91,15 @@ class Field {
             ->setRules([])
         ;
 
+	}
+
+	public function setEmptyValue ( $emptyValue ) {
+		$this->_emptyValue = $emptyValue ;
+		return $this;
+	}
+
+	public function getEmptyValue ( ) {
+		return $this->_emptyValue ;
 	}
 
 	public function setAttribute ( $key , $value ) {
@@ -117,14 +128,14 @@ class Field {
 		}
 		return $this ;
 	}
-	
+
 	public function getPostKey ( ) {
-		return $this->_postKey ;	
+		return $this->_postKey ;
 	}
 
 	public function setView ( \TotalFlex\View $View ) {
 		$this->_view = $View ;
-	}	
+	}
 
 	public function getView ( ) {
 		return $this->_view ;
@@ -163,7 +174,7 @@ class Field {
      *
      * @param string Column name
      * @return self
-     * @throws \InvalidArgumentException 
+     * @throws \InvalidArgumentException
      */
     public function setColumn($column) {
     	if (empty($column)) {
@@ -176,7 +187,7 @@ class Field {
 
     public function resetValue ( ) {
     	$this->_value = $this->_defaultValue ;
-    } 
+    }
 
     /**
      * Gets the Field label
@@ -328,5 +339,5 @@ class Field {
 
     // 	return $this->_table;
     // }
-    
+
 }

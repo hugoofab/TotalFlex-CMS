@@ -231,6 +231,8 @@ class View {
 			$Field->setValue ( $_POST['TFFields'][$this->getName()][TotalFlex::CtxRead]['fields'][$Field->getColumn()] );
 		}
 
+		if ( empty ( $Field->getValue ( ) ) ) $Field->setValue ( $Field->getEmptyValue ( ) ) ;
+
 		if ( is_a ( $Field , '\TotalFlex\Field\File' ) ) {
 			$this->getForm()->setEnctype("multipart/formdata");
 		}

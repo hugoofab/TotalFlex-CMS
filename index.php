@@ -104,8 +104,8 @@ $TotalFlex->registerView('business_entity')
 
 ;
 
-// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
-$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
+$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
+// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
 
 echo \TotalFlex\Feedback::dumpMessages();
 
@@ -151,7 +151,8 @@ echo \TotalFlex\Feedback::dumpMessages();
 		<!-- o terceiro parametro pode ser uma string com o nome da classe TotalFlex\View\Formatter ou pode ser uma instancia do próprio formatter -->
 		<!-- no caso de ser uma instancia, você pode instancia-lo e fazer as devidas configurações no formatter antes de injeta-lo no metodo TotalFlex->generate() -->
 		<!-- caso não seja necessário configurar nada no View\Formatter, pode passar só o nome do mesmo como string  -->
-		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
+		<?//=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
+		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxCreate , 'html' )?>
 
 	</div>
 

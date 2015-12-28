@@ -51,12 +51,14 @@ class QueryBuilder {
      * @param  [type] $fieldList [description]
      * @return [type]            [description]
      */
-    public function getCreateQuery ( $fieldList ) {
+    public function getCreateQuery ( $keyList ) {
 
-    	$keyList = array_keys ( $fieldList );
+    	// $keyList = array_keys ( $fieldList );
+
+    	for ( $i = 0 ; $i< count ( $keyList ) ; $i++ ) $markList[] = "?" ;
 
     	$output = "INSERT INTO " . implode ( ', ' , $this->_queryFrom ) . "( " . implode ( ', ' , $keyList ) . " ) VALUES ".
-    	"( '" . implode ( "','" , $fieldList ) . "' )";
+    	"( " . implode ( "," , $markList ) . " )";
 
     	return $output;
     }

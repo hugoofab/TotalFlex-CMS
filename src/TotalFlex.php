@@ -217,11 +217,14 @@ class TotalFlex {
 		foreach ( $fieldList as $Field ) {
 			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 			if ( $Field->isPrimaryKey() ) continue ;
-			$queryFieldList[$Field->getColumn()] = $Field->getValue();
+			// $queryFieldList[$Field->getColumn()] = $Field->getValue();
+			$columnList[] = $Field->getColumn();
+			$valueList[] = $Field->getValue();
 		}
 
-		$query = $view->queryBuilder()->getCreateQuery($queryFieldList);
-		$exec  = $this->_targetDb->query($query);
+		$query     = $view->queryBuilder()->getCreateQuery($columnList);
+		$statement = $this->_targetDb->prepare($query);
+		$exec      = $statement->execute($valueList);
 
 		if ( $exec ) {
 			foreach ( $fieldList as $Field ) {
