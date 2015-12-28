@@ -82,12 +82,14 @@ class Html extends ViewFormatterAbstract implements ViewFormatterInterface {
 			// precisa adicionar o primary key
 			// precisa também de um campo de proteção
 			$primaryKeyFieldList = $View->getPrimaryKeyFields();
-			$hash = sha1 ( serialize ( $primaryKeyFieldList ) . "wYWZzcjM5TMidzN0QWOiljZhRDMwUTNkhDNwUDN0ETMxEDMwMDOygTZihTO5IDN2QGM2QWZyYTZmZ" );
-			$form .= "<input type=\"hidden\" name=\"TFFields[".$View->getName()."][$context][validation_hash]\" value=\"$hash\" />\n" ;
+			$hashSource = "";
 			foreach ( $primaryKeyFieldList as $pkField ) {
+				$hashSource = $pkField->getColumn()."=".$pkField->getValue();
 				$form .= "<input type=\"hidden\" name=\"TFFields[".$View->getName()."][$context][fields][".$pkField->getColumn()."]\" value=\"".$pkField->getValue()."\" />\n" ;
 				// $form .= $this->generateField ( $pkField , $context );
 			}
+			$hash = sha1 ( md5 ( $hashSource ) . \TotalFlex\TotalFlex::SECURITY_SALT );
+			$form .= "<input type=\"hidden\" name=\"TFFields[".$View->getName()."][$context][validation_hash]\" value=\"$hash\" />\n" ;
 
 		}
 

@@ -39,22 +39,6 @@ class View {
 
     private $_form ;
 
-    private $_feedbackMessageList = array (
-    	'success' => array (
-			TotalFlex::CtxCreate => "Saved sucessfully" ,
-			TotalFlex::CtxRead   => "" ,
-			TotalFlex::CtxUpdate => "Updated sucessfully" ,
-			TotalFlex::CtxDelete => "Deleted sucessfully" ,
-    	),
-    	'error' => array (
-			TotalFlex::CtxCreate => "Could not create" ,
-			TotalFlex::CtxRead   => "" ,
-			TotalFlex::CtxUpdate => "Could not update" ,
-			TotalFlex::CtxDelete => "Could not delete" ,
-    	)
-    );
-
-
     /**
      * Constructs the View
      *

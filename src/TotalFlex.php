@@ -31,6 +31,11 @@ class TotalFlex {
 	const CtxDelete	= 0b1000;
 
 	/**
+	 * @var used to hasing
+	 */
+	const SECURITY_SALT = "wYWZzcjM5TMidzN0QWOiljZhRDMwUTNkhDNwUDN0ETMxEDMwMDOygTZihTO5IDN2QGM2QWZyYTZmZ";
+
+	/**
 	 * @var string $_callbackUrl Callback URL to forms access TotalFlex
 	 */
 	private $_callbackUrl;
@@ -49,6 +54,22 @@ class TotalFlex {
 	 * @var array $_views Views configuration
 	 */
 	private $_views;
+
+
+    private $_feedbackMessageList = array (
+    	'success' => array (
+			TotalFlex::CtxCreate => "Saved sucessfully" ,
+			TotalFlex::CtxRead   => "" ,
+			TotalFlex::CtxUpdate => "Updated sucessfully" ,
+			TotalFlex::CtxDelete => "Deleted sucessfully" ,
+    	),
+    	'error' => array (
+			TotalFlex::CtxCreate => "Could not create" ,
+			TotalFlex::CtxRead   => "" ,
+			TotalFlex::CtxUpdate => "Could not update" ,
+			TotalFlex::CtxDelete => "Could not delete" ,
+    	)
+    );
 
 
 	/**
@@ -127,7 +148,60 @@ class TotalFlex {
     }
 
     private function _processUpdate ( $viewName ) {
-		$view = $this->getView ( $viewName );
+
+		$myContext = TotalFlex::CtxUpdate ;
+		$view      = $this->getView ( $viewName );
+
+		// @todo precisa desacoplar. Chamar o $_POST dessa maneira tão engessada não é a melhor forma.
+		if ( empty ( $_POST['TFFields'][$viewName][$myContext] ) ) return ;
+
+		// ======================================================================================
+			// THIS VALIDATION IS HERE BUT IT SHOULD NOT BE HERE
+			// actually who create this hashcode is the formatter, so if TotalFlex recreate it, we are linking hardly TotalFlex with one formatter
+			// the recomended is unbound this pieces of the system.
+			// @todo #26
+			$primaryKeyFields = $view->getPrimaryKeyFields ( );
+
+			foreach ( $primaryKeyFields as $pkField ) {
+				$hashSource = $pkField->getColumn()."=".$_POST['TFFields'][$view->getName()][$myContext]['fields'][$pkField->getColumn()];
+			}
+			$hash = sha1 ( md5 ( $hashSource ) . \TotalFlex\TotalFlex::SECURITY_SALT );
+			if ( $hash !== $_POST['TFFields'][$view->getName()][$myContext]['validation_hash'] ) throw new \Exception ( "Invalid form data" );
+		// ======================================================================================
+
+		$fieldList = $view->getFieldsFromContext ( $myContext );
+
+		$queryFieldList = $fieldValuesList = array ( );
+		foreach ( $fieldList as $Field ) {
+
+			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+			if ( $Field->isPrimaryKey ( ) ) continue ;
+
+    		$fieldValuesList[] = $Field->getValue();
+			$queryFieldList[$Field->getColumn()] = $Field->getValue();
+
+		}
+
+		$query = $view->queryBuilder()->getUpdateSaveQuery ( $view->getFields() );
+
+// @todo precisa desacoplar. Chamar o $_POST dessa maneira tão engessada não é a melhor forma.
+		foreach ( $primaryKeyFields as $pkField ) array_push ( $fieldValuesList , $_POST['TFFields'][$view->getName()][$myContext]['fields'][$pkField->getColumn()] );
+
+		$this->_targetDb->prepare ( $query );
+
+		$statement = $this->_targetDb->prepare ( $query );
+		$exec = $statement->execute ( $fieldValuesList );
+
+		if ( $exec ) {
+			Feedback::addMessage( $this->_feedbackMessageList['success'][TotalFlex::CtxUpdate] , Feedback::MESSAGE_SUCCESS );
+			// need redirect here to avoid user repost
+			// maybe user will want to redirect to list page instead of keep on edit page
+		} else {
+			$errorInfo = $this->_targetDb->errorInfo();
+			// pre($this->_targetDb->errorCode());
+			Feedback::addMessage ( $errorInfo[2] , Feedback::MESSAGE_DANGER );
+		}
+
 
     }
 
@@ -155,6 +229,7 @@ class TotalFlex {
 				if ( $Field->isPrimaryKey() ) continue ;
 				$Field->setValue('');
 			}
+			Feedback::addMessage( $this->_feedbackMessageList['success'][TotalFlex::CtxCreate] , Feedback::MESSAGE_SUCCESS );
 			// need redirect here to avoid user repost
 		} else {
 			$errorInfo = $this->_targetDb->errorInfo();

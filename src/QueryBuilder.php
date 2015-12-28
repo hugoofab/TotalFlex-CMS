@@ -82,4 +82,28 @@ class QueryBuilder {
 
     }
 
+    /**
+     * @todo #25 precisa aplicar regras de segurança etc...
+     * return query used to save the data we want to update
+     * @return string query string
+     */
+    public function getUpdateSaveQuery ( Array $fieldList ) {
+
+    	$fieldValuesList = $primaryKeyList = array ( );
+    	foreach ( $fieldList as $Field ) {
+    		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+
+    		if ( $Field->isPrimaryKey ( ) ) {
+    			$primaryKeyList[] = " " . $Field->getColumn() . " = ? ";
+    		} else {
+	    		$fieldValuesList[] = " " . $Field->getColumn() . " = ? ";
+    		}
+    	}
+
+    	$query = "UPDATE " . implode ( ", \n\t" , $this->_queryFrom ) . " SET " . implode ( ", \n\t" , $fieldValuesList ) . " WHERE " . implode ( " AND \n\t" , $primaryKeyList );
+
+    	return $query ;
+
+    }
+
 }

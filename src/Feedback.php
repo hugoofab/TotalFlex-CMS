@@ -5,9 +5,11 @@ namespace TotalFlex;
 class Feedback {
 
 	public static $messageList = array ( );
-	
+
 	// essa mensagem deveria piscar quado criada para ver que houve uma mudança entre
 	// a visualização de uma antiga e uma nova
+	// não consegui fazer piscar com css transition porque precisa ser posto no evento :hover
+	// e eu precisava que fosse no momento em que foi criado. talvez precisa de um pouco de javascript-no-jutsu
 	public static $templateList = array (
 		"<p class=\"bg-danger\">__message__</p>" ,
 		"<p class=\"bg-primary\">__message__</p>" ,
@@ -16,15 +18,15 @@ class Feedback {
 		"<p class=\"bg-warning\">__message__</p>"
 	);
 
-	const MESSAGE_ERROR   = 0;
+	// const MESSAGE_ERROR   = 0;
 	const MESSAGE_DANGER  = 0;
 	const MESSAGE_PRIMARY = 1;
-	const MESSAGE_SUCESS  = 2;
+	const MESSAGE_SUCCESS = 2;
 	const MESSAGE_INFO    = 3;
 	const MESSAGE_WARNING = 4;
 
 	public static function addMessage ( $message , $type = Feedback::MESSAGE_INFO ) {
-		
+
 		if ( !isset ( Feedback::$templateList[$type] ) ) throw new Exception ( "undefined message error type" );
 		Feedback::$messageList[] = str_replace ( "__message__" , $message , Feedback::$templateList[$type] );
 
@@ -37,7 +39,7 @@ class Feedback {
 	public static function dumpMessages ( ) {
 		if ( empty ( Feedback::$messageList ) ) return ;
 		$output = "";
-		foreach ( Feedback::$messageList as $message ) $output .= $message ; 
+		foreach ( Feedback::$messageList as $message ) $output .= $message ;
 		return $output ;
 	}
 

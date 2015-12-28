@@ -30,10 +30,10 @@ use TotalFlex\Field;
 
 // macbook
 // $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
-$pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
+// $pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 
 // imac
-// $pdo = new PDO("mysql:dbname=test", "root", "");
+$pdo = new PDO("mysql:dbname=test", "root", "");
 
 
 /************************************************************
