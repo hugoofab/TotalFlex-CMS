@@ -4,7 +4,7 @@ namespace TotalFlex\Field;
 
 use TotalFlex\Field\Field;
 
-class Select extends Field implements FieldAbstract {
+class Select extends Field {
 
 	/**
 	 * @var array options to put inside select

@@ -2,7 +2,7 @@
 
 namespace TotalFlex\Field;
 
-class Field implements FieldAbstract {
+class Field {
 
 	/**
 	 * @var string Column name
