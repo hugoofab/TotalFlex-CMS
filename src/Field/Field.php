@@ -2,7 +2,7 @@
 
 namespace TotalFlex\Field;
 
-class Field {
+class Field implements FieldAbstract {
 
 	/**
 	 * @var string Column name
@@ -50,12 +50,25 @@ class Field {
 	private $_postKey;
 
 	/**
-	 * specific template for this field
-	 * @var [type]
+	 * Default template for all Fields
+	 * @var string
 	 */
-	private $_template = null ;
+	protected static $defaultEncloseStart  = "";
+	protected static $defaultEncloseEnd    = "";
+	protected static $defaultTemplate      = "\t<input type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n" ;
+	protected static $defaultLabelTemplate = "\t<label for=\"__id__\">__label__</label><br>\n" ;
 
 	/**
+	 * specific template for this field
+	 * this can't be 'private', it **must** be 'protected' so, subclasses can override it
+	 * @var [type]
+	 */
+	protected $_encloseStart ;
+	protected $_encloseEnd ;
+	protected $_template ;
+	protected $_labelTemplate ;
+
+ 	/**
 	 * @todo #24
 	 * additional attributes to be set on html element
 	 * @var array
@@ -69,8 +82,26 @@ class Field {
 
 	private $_emptyValue = null ;
 
+
+	public static function setDefaultEncloseStart ( $defaultEncloseStart ) {
+		static::$defaultEncloseStart = $defaultEncloseStart ;
+	}
+
+	public static function setDefaultEncloseEnd ( $defaultEncloseEnd ) {
+		static::$defaultEncloseEnd = $defaultEncloseEnd ;
+	}
+
+	public static function setDefaultTemplate ( $defaultTemplate ) {
+		static::$defaultTemplate = $defaultTemplate ;
+	}
+
+	public static function setDefaultLabelTemplate ( $defaultLabelTemplate ) {
+		static::$defaultLabelTemplate = $defaultLabelTemplate ;
+	}
+
+
 	public static function getInstance ( $column , $label ) {
-		return new Field ( $column , $label );
+		return new self ( $column , $label );
 	}
 
 	/**
@@ -81,6 +112,11 @@ class Field {
 	 * @throws \InvalidArgumentException
 	 */
 	public function __construct ( $column , $label ) {
+
+		if ( empty ( $this->_encloseStart  ) ) $this->_encloseStart  = static::$defaultEncloseStart ;
+		if ( empty ( $this->_encloseEnd    ) ) $this->_encloseEnd    = static::$defaultEncloseEnd ;
+		if ( empty ( $this->_template      ) ) $this->_template      = static::$defaultTemplate ;
+		if ( empty ( $this->_labelTemplate ) ) $this->_labelTemplate = static::$defaultLabelTemplate ;
 
 		$this
             ->setColumn($column)
@@ -296,6 +332,42 @@ class Field {
     public function setValue ( $value ) {
     	$this->_value = $value;
     	return $this ;
+    }
+
+    public function toHtml ( $context ) {
+
+		$output     = $this->_encloseStart;
+
+		if (!empty($this->getLabel())) {
+			$out = str_replace ( '__id__'    , $this->getColumn() , $this->_labelTemplate );
+			$out = str_replace ( '__label__' , $this->getLabel() , $out );
+			$output .= $out;
+		}
+
+		$attributeList = $this->getAttributes ();
+		$attributes = "";
+		foreach ( $attributeList as $attrKey => $attrValue ) $attributes .= " $attrKey=\"$attrValue\" " ;
+
+		$fieldTemplate = preg_replace ( '/^([^<]*<\w+)(\s*)(.*)/' , "$1 ".$attributes." $3" , $this->getTemplate () );
+
+		$out = str_replace ( '__type__'  , $this->getType ()   , $fieldTemplate );
+		$out = str_replace ( '__id__'    , "tf-field-".$this->getColumn () , $out );
+		$out = str_replace ( '__name__'  , "TFFields[".$this->getView()->getName()."][$context][fields][".$this->getPostKey ()."]" , $out );
+		$out = str_replace ( '__value__' , $this->getValue ()  , $out );
+		$output .= $out ;
+
+		$output .= $this->_encloseEnd;
+
+		return $output;
+
+    }
+
+    /**
+     * @todo
+     * @param  [type] $context [description]
+     * @return [type]          [description]
+     */
+    public function toJson ( $context ) {
     }
 
     /**

@@ -29,11 +29,11 @@ use TotalFlex\Field;
 // $conn = null;
 
 // macbook
-// $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
+$pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
 // $pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 
 // imac
-$pdo = new PDO("mysql:dbname=test", "root", "");
+// $pdo = new PDO("mysql:dbname=test", "root", "");
 
 
 /************************************************************
@@ -55,9 +55,10 @@ $pdo = new PDO("mysql:dbname=test", "root", "");
 $TotalFlex = new TotalFlex ( $pdo );
 
 // DEFAULT TEMPLATE #################################################################
-	\TotalFlex\View\Formatter\Html::$defaultTemplateCollection['start']         = "<div class=\"col-md-6 form-group\">\n";
-	\TotalFlex\View\Formatter\Html::$defaultTemplateCollection['end']           = "</div>\n";
-	\TotalFlex\View\Formatter\Html::$defaultTemplateCollection['input']['text'] = "\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
+	\TotalFlex\Field\Field::setDefaultEncloseStart("<div class=\"col-md-6 form-group\">\n");
+	\TotalFlex\Field\Field::setDefaultEncloseEnd("</div>\n");
+	\TotalFlex\Field\Field::setDefaultTemplate("\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n");
+	\TotalFlex\Field\Select::setDefaultTemplate("\t<select class=\"form-control\" name=\"__name__\" id=\"__id__\" >\n__options__\n</select>\n\n");
 // ##################################################################################
 
 ?><!DOCTYPE html>
@@ -81,31 +82,44 @@ $TotalFlex->registerView('business_entity')
 
 	// set default contexts to be applyed to all fields from now on
 
-	->setContexts(TotalFlex::CtxRead)
-	->addField( Field\Text::getInstance ( 'id_news_label' , 'ID' ) )->setPrimaryKey()
+	// MODELO 1 =================================================================================
 
-	->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate|TotalFlex::CtxRead)
-	->addField( Field\Text::getInstance ( 'label' , 'Label' ) )
+		// ->setContexts(TotalFlex::CtxRead)
+		// ->addField( Field\Text::getInstance ( 'id_news_label' , 'ID' ) )->setPrimaryKey()
+		// ->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate|TotalFlex::CtxRead)
+		// ->addField( Field\Text::getInstance ( 'label' , 'Label' ) )
+		// ->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
+		// ->where ( "id_news_label = 1" )
+		// ->setTable ( "news_label" )
 
-	->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
+	// NECESSARIO PARA O CONTEXTO UPDATE ========================================================
 
-	->where ( "id_news_label = 1" )
+		// ->WHERE ( 'fieldid = X' )
+		// para criar o contexto de editar, precisa encontrar a tupla que desejamos.
+		// deve gerar uma excessão caso encontre mais que uma tupla?
+		// possivelmente geraria uma excessão mas permitiria com um metodo a edição multipla,
+		// 		assim o padrão é não aceitar, mas se o usuário declarar explicitamente que deseja alterar multiplas tuplas, que assim seja.
 
-	->setTable ( "news_label" )
+		// caso não encontre nenhuma tupla, podemos gerar uma exce
 
-	// ->WHERE ( 'fieldid = X' )
-	// para criar o contexto de editar, precisa encontrar a tupla que desejamos.
+	// USANDO O FIELD SELECT ==========================================================================
 
-	// deve gerar uma excessão caso encontre mais que uma tupla?
-	// possivelmente geraria uma excessão mas permitiria com um metodo a edição multipla,
-	// 		assim o padrão é não aceitar, mas se o usuário declarar explicitamente que deseja alterar multiplas tuplas, que assim seja.
+		->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate)
+		->addField ( Field\Text::getInstance ( "id_menu" , "ID" ) )->setPrimaryKey()
+		// futuramente deve ser possível passar uma query no lugar do array, ou um objeto especial que recebe a query e devolve o array
+		->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
 
-	// caso não encontre nenhuma tupla, podemos gerar uma exce
+		->where ( "id_menu = 1")
+
+		->setTable ( "menu" )
+
+	// ==========================================================================================
+
 
 ;
 
-$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate , function ( ) { }) ;
-// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
+// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate , function ( ) { }) ;
+$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
 
 echo \TotalFlex\Feedback::dumpMessages();
 
@@ -151,14 +165,12 @@ echo \TotalFlex\Feedback::dumpMessages();
 		<!-- o terceiro parametro pode ser uma string com o nome da classe TotalFlex\View\Formatter ou pode ser uma instancia do próprio formatter -->
 		<!-- no caso de ser uma instancia, você pode instancia-lo e fazer as devidas configurações no formatter antes de injeta-lo no metodo TotalFlex->generate() -->
 		<!-- caso não seja necessário configurar nada no View\Formatter, pode passar só o nome do mesmo como string  -->
-		<?//=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
-		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxCreate , 'html' )?>
+		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
+		<?//=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxCreate , 'html' )?>
 
 	</div>
 
 </div>
-
-
 
 </body>
 </html>

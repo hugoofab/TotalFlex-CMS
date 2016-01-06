@@ -15,30 +15,18 @@ class Html extends ViewFormatterAbstract implements ViewFormatterInterface {
 	 * template content to generate output
 	 * @var array
 	 */
+	// ISSO SERÁ ABANDONADO! O TEMPLATE SER´A DE RESPONSABILIDADE DO PR´OPRIO FIELD
 	public static $defaultTemplateCollection = array (
 
-		'start'   => "",
-		'label'   => "\t<label for=\"__id__\">__label__</label><br>\n" ,
-		'message' => "<div class=\"msg msg-__type__\">__message__</div>" ,
-		'end'     => "" ,
+		// 'start'   => "",
+		// 'label'   => "\t<label for=\"__id__\">__label__</label><br>\n" ,
+		// 'message' => "<div class=\"msg msg-__type__\">__message__</div>" ,
+		// 'end'     => "" ,
 
 		'form'    => array (
 			'start' => "<form action=\"__action__\" method=\"__method__\" enctype=\"__enctype__\" >\n" ,
 			'end'   => "</form>\n" ,
 		),
-
-		'input'      => array (
-			'text'   => "\t<input type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n" ,
-			'hidden' => "\t<input type=\"hidden\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n" ,
-			'file' 	 => "\t<input type=\"file\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n" ,
-		),
-
-		// O BOTAO NAO DEVE FICAR AQUI, DEVE SER CAPAZ DE SE AUTO-DESENHAR
-		// 'button'  => array (
-		// 	'submit' => "<button type=\"submit\" >__label__</button>" ,
-		// 	'button' => "<button type=\"button\" >__label__</button>" ,
-		// 	'cancel' => "<button type=\"cancel\" >__label__</button>" ,
-		// ),
 
 	);
 
@@ -71,11 +59,7 @@ class Html extends ViewFormatterAbstract implements ViewFormatterInterface {
 
 		foreach ($View->getFields() as $Field) {
 			if (!$Field->isInContext($context)) continue;
-			if ( is_a ( $Field , 'TotalFlex\Button' ) ) {
-				$form .= $this->generateButton($Field,$context);
-			} else {
-				$form .= $this->generateField($Field,$context);
-			}
+			$form .= $Field->toHtml ( $context );
 		}
 
 		if ( $context === \TotalFlex\TotalFlex::CtxUpdate ) {
@@ -130,35 +114,35 @@ class Html extends ViewFormatterAbstract implements ViewFormatterInterface {
 	 * @param string $value Pre-filled value.
 	 * @return string The field HTML
 	 */
-	protected function generateField ( \TotalFlex\Field\Field $Field , $context ) {
+	// protected function generateField ( \TotalFlex\Field\Field $Field , $context ) {
 
-		$output     = $this->_templateCollection['start'];
+		// $output     = $this->_templateCollection['start'];
 
-		if (!empty($Field->getLabel())) {
-			$out = str_replace ( '__id__'    , $Field->getColumn() , $this->_templateCollection['label'] );
-			$out = str_replace ( '__label__' , $Field->getLabel() , $out );
-			$output .= $out;
-		}
+		// if (!empty($Field->getLabel())) {
+		// 	$out = str_replace ( '__id__'    , $Field->getColumn() , $this->_templateCollection['label'] );
+		// 	$out = str_replace ( '__label__' , $Field->getLabel() , $out );
+		// 	$output .= $out;
+		// }
 
-		$fieldTemplate = ( $Field->getTemplate () === null ) ? $this->_templateCollection['input'][$Field->getType()] : $Field->getTemplate () ;
+		// $fieldTemplate = ( $Field->getTemplate () === null ) ? $this->_templateCollection['input'][$Field->getType()] : $Field->getTemplate () ;
 
-		$attributeList = $Field->getAttributes ();
-		$attributes = "";
-		foreach ( $attributeList as $attrKey => $attrValue ) $attributes .= " $attrKey=\"$attrValue\" " ;
+		// $attributeList = $Field->getAttributes ();
+		// $attributes = "";
+		// foreach ( $attributeList as $attrKey => $attrValue ) $attributes .= " $attrKey=\"$attrValue\" " ;
 
-		$fieldTemplate = preg_replace ( '/^([^<]*<\w+)(\s*)(.*)/' , "$1 ".$attributes." $3" , $fieldTemplate);
+		// $fieldTemplate = preg_replace ( '/^([^<]*<\w+)(\s*)(.*)/' , "$1 ".$attributes." $3" , $fieldTemplate);
 
-		$out = str_replace ( '__type__'  , $Field->getType ()   , $fieldTemplate );
-		$out = str_replace ( '__id__'    , "tf-field-".$Field->getColumn () , $out );
-		$out = str_replace ( '__name__'  , "TFFields[".$Field->getView()->getName()."][$context][fields][".$Field->getPostKey ()."]" , $out );
-		$out = str_replace ( '__value__' , $Field->getValue ()  , $out );
-		$output .= $out ;
+		// $out = str_replace ( '__type__'  , $Field->getType ()   , $fieldTemplate );
+		// $out = str_replace ( '__id__'    , "tf-field-".$Field->getColumn () , $out );
+		// $out = str_replace ( '__name__'  , "TFFields[".$Field->getView()->getName()."][$context][fields][".$Field->getPostKey ()."]" , $out );
+		// $out = str_replace ( '__value__' , $Field->getValue ()  , $out );
+		// $output .= $out ;
 
-		$output .= $this->_templateCollection['end'];
+		// $output .= $this->_templateCollection['end'];
 
-		return $output;
+		// return $output;
 
-	}
+	// }
 
 	/**
 	 * Generate button HTML.
@@ -169,9 +153,9 @@ class Html extends ViewFormatterAbstract implements ViewFormatterInterface {
 	 * @param string $value Pre-filled value.
 	 * @return string The field HTML
 	 */
-	protected function generateButton ( \TotalFlex\Button $Button , $context ) {
-		return "$Button" ;
-	}
+	// protected function generateButton ( \TotalFlex\Button $Button , $context ) {
+	// 	return "$Button" ;
+	// }
 
 	/**
 	 * Generate message HTML

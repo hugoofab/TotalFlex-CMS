@@ -4,8 +4,9 @@ namespace TotalFlex\Field;
 
 use TotalFlex\Field\Field;
 
-class Hidden extends Field { 
+class Hidden extends Field {
 
+	private $_template = "\t<input type=\"hidden\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
 
 	public static function getInstance ( $column , $label ) {
 		return new Hidden ( $column , $label );
