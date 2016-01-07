@@ -19,9 +19,10 @@ class Select extends Field {
 	 */
 	protected static $defaultTemplate = "\t<select name=\"__name__\" id=\"__id__\" >\n__options__\n</select>\n\n" ;
 
-	public static function getInstance ( $column , $label , $options ) {
-		return new self ( $column , $label , $options );
-	}
+	// php trigger an error because Select::getInstance has different number of agruments from Field::getInstance()
+	// public static function getInstance ( $column , $label , $options ) {
+	// 	return new self ( $column , $label , $options );
+	// }
 
 	/**
 	 * Constructs the field
