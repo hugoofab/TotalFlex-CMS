@@ -1,4 +1,4 @@
-<?
+<?php
 
 require 'vendor/autoload.php';
 require 'bootstrap.php';
@@ -52,9 +52,13 @@ $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
 
 // $result = $pdo->query("SELECT * FROM business_entity");
 
-$TotalFlex = new TotalFlex ( $pdo );
+TotalFlex::setDefaultDB($pdo);
+$TotalFlex = new TotalFlex ( );
 
-// DEFAULT TEMPLATE #################################################################
+// tambem pode-se passar o $pdo como parametro para o construtor do TF
+// $TotalFlex = new TotalFlex ( $pdo );
+
+// DEFAULT TEMPLATE TO BE COMPATIBLE WITH BOOTSTRAP #################################################################
 	\TotalFlex\Field\Field::setDefaultEncloseStart("<div class=\"col-md-6 form-group\">\n");
 	\TotalFlex\Field\Field::setDefaultEncloseEnd("</div>\n");
 	\TotalFlex\Field\Field::setDefaultTemplate("\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n");
@@ -82,7 +86,7 @@ $TotalFlex->registerView('business_entity')
 
 	// set default contexts to be applyed to all fields from now on
 
-	// MODELO 1 =================================================================================
+	// MODELO BASICO =================================================================================
 
 		// ->setContexts(TotalFlex::CtxRead)
 		// ->addField( Field\Text::getInstance ( 'id_news_label' , 'ID' ) )->setPrimaryKey()
@@ -102,12 +106,13 @@ $TotalFlex->registerView('business_entity')
 
 		// caso não encontre nenhuma tupla, podemos gerar uma exce
 
-	// USANDO O FIELD SELECT ==========================================================================
+	// USANDO O FIELD SELECT E SELECTDB ==========================================================================
 
 		->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate)
 		->addField ( Field\Text::getInstance ( "id_menu" , "ID" ) )->setPrimaryKey()
 		// futuramente deve ser possível passar uma query no lugar do array, ou um objeto especial que recebe a query e devolve o array
 		->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
+		->addField ( Field\SelectDB::getInstance ( "id_page" , "Página" , "title" , "id_page" , "select '' id_page , 'Nenhuma' title union select id_page , title from page" ) )
 
 		->where ( "id_menu = 1")
 

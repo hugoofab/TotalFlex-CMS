@@ -55,6 +55,10 @@ class TotalFlex {
 	 */
 	private $_views;
 
+	/**
+	 * @var null default db to be used on all classes that need it. we expects it be a pdo instance
+	 */
+	protected static $defaultDB = null ;
 
     private $_feedbackMessageList = array (
     	'success' => array (
@@ -83,7 +87,7 @@ class TotalFlex {
 	 * @param array $opts (Optional) Associative array with driver-specific options
 	 * @throws \RuntimeException
 	 */
-	public function __construct ( $pdo ) {
+	public function __construct ( $pdo = null ) {
 	// public function __construct(/** $callbackUrl, $method, $dsn, $user, $pass, $opts **/) {
 		/*
 		 * Initializes the DB Connection
@@ -91,7 +95,14 @@ class TotalFlex {
 
 		// $pdo should be instance of PDO
 		// $this->_targetDb = new FluentPDO($pdo);
-		$this->_targetDb = $pdo;
+
+		if ( $pdo !== null ) {
+			$this->_targetDb = $pdo;
+		} else if ( self::$defaultDB !== null ) {
+			$this->_targetDb = self::$defaultDB;
+		} else {
+			throw new DefaultDBNotSet ( "You have to set default db with TotalFlex::setDefaultDB() or give it as an argument in constructor method" );
+		}
 
 		// $argc = func_num_args();
 		// $argv = func_get_args();
@@ -121,6 +132,14 @@ class TotalFlex {
 		 */
 		$this->_contexts = [];
 
+	}
+
+	public static function setDefaultDB ( $db ) {
+		self::$defaultDB = $db ;
+	}
+
+	public static function getDefaultDB ( ) {
+		return self::$defaultDB ;
 	}
 
 	/**

@@ -4,23 +4,25 @@ namespace TotalFlex\Field;
 
 use TotalFlex\Field\Field;
 
-class Select extends Field {
+class SelectDB extends Field {
 
 	/**
 	 * @var array options to put inside select
 	 */
 	protected $_options = array ( );
 
+	protected $db = null ;
+
 	// it can be required in future
 	protected $_optionTemplate = "";
 
 	/**
-	 * @var string select specific default template
+	 * @var string if empty, we'll get the default template of \Field\Select
 	 */
-	protected static $defaultTemplate = "\t<select name=\"__name__\" id=\"__id__\" >\n__options__\n</select>\n\n" ;
+	protected static $defaultTemplate = "" ;
 
-	public static function getInstance ( $column , $label , $options ) {
-		return new self ( $column , $label , $options );
+	public static function getInstance ( $column , $label , $labelField , $valueField , $query , $db = null ) {
+		return new self ( $column , $label , $labelField , $valueField , $query , $db );
 	}
 
 	/**
@@ -30,16 +32,35 @@ class Select extends Field {
 	 * @param string $label Field label
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct ( $column , $label , $options ) {
+	public function __construct ( $column , $label , $labelField , $valueField , $query , $db = null ) {
+
+		if ( empty ( self::$defaultTemplate ) ) {
+			self::$defaultTemplate = Select::getDefaultTemplate();
+		}
 
 		parent::__construct ( $column , $label );
-		$this->_options = $options ;
+
+		if ( $db !== null ) {
+			$this->db = $db ;
+		} else if ( \TotalFlex\TotalFlex::getDefaultDB () !== null ) {
+			$this->db = \TotalFlex\TotalFlex::getDefaultDB();
+		} else {
+			throw new DefaultDBNotSet ( "You have to set default db with TotalFlex::setDefaultDB() or give it as an argument in constructor method" );
+		}
+
+    	$statement = $this->db->prepare ( $query );
+    	if ( !$statement->execute() ) throw new Exception ( $statement->errorInfo() );
+    	$result = $statement->fetchAll ( \PDO::FETCH_ASSOC );
+
+    	foreach ( $result as $res ) {
+    		$this->_options[$res[$labelField]] = $res[$valueField] ;
+    	}
 
 	}
 
     public function toHtml ( $context ) {
 
-		$output     = $this->_encloseStart;
+		$output = $this->_encloseStart;
 
 		if (!empty($this->getLabel())) {
 			$out = str_replace ( '__id__'    , $this->getColumn() , $this->_labelTemplate );

@@ -99,10 +99,16 @@ class Field {
 		static::$defaultLabelTemplate = $defaultLabelTemplate ;
 	}
 
-
-	public static function getInstance ( $column , $label ) {
-		return new self ( $column , $label );
+	public static function getDefaultTemplate ( ) {
+		return static::$defaultTemplate ;
 	}
+
+	/**
+	 * only child classes will have it's own getInstance method
+	 */
+	// public static function getInstance ( $column , $label ) {
+	// 	return new self ( $column , $label );
+	// }
 
 	/**
 	 * Constructs the field
