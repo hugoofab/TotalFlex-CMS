@@ -114,7 +114,11 @@ $TotalFlex->registerView('business_entity')
 		->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
 		->addField ( Field\SelectDB::getInstance ( "id_page" , "Página" , "title" , "id_page" , "select '' id_page , 'Nenhuma' title union select id_page , title from page" ) )
 
-		->where ( "id_menu = 1")
+		->addField ( Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 40 , Field\File::TYPE_WEB_IMAGE ) )
+
+		->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
+
+		// ->where ( "id_menu = 1")
 
 		->setTable ( "menu" )
 
@@ -124,7 +128,8 @@ $TotalFlex->registerView('business_entity')
 ;
 
 // $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate , function ( ) { }) ;
-$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
+// $TotalFlex->processPost ( "business_entity" , TotalFlex::CtxUpdate ) ;
+$TotalFlex->processPost ( "business_entity" , TotalFlex::CtxCreate ) ;
 
 echo \TotalFlex\Feedback::dumpMessages();
 
@@ -170,8 +175,8 @@ echo \TotalFlex\Feedback::dumpMessages();
 		<!-- o terceiro parametro pode ser uma string com o nome da classe TotalFlex\View\Formatter ou pode ser uma instancia do próprio formatter -->
 		<!-- no caso de ser uma instancia, você pode instancia-lo e fazer as devidas configurações no formatter antes de injeta-lo no metodo TotalFlex->generate() -->
 		<!-- caso não seja necessário configurar nada no View\Formatter, pode passar só o nome do mesmo como string  -->
-		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
-		<?//=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxCreate , 'html' )?>
+		<?//=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxUpdate , 'html' )?>
+		<?=$TotalFlex->generate ( 'business_entity' , TotalFlex::CtxCreate , 'html' )?>
 
 	</div>
 

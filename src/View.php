@@ -234,7 +234,7 @@ class View {
 		if ( empty ( $Field->getValue ( ) ) ) $Field->setValue ( $Field->getEmptyValue ( ) ) ;
 
 		if ( is_a ( $Field , '\TotalFlex\Field\File' ) ) {
-			$this->getForm()->setEnctype("multipart/formdata");
+			$this->getForm()->setEnctype("multipart/form-data");
 		}
 
 		// append it!

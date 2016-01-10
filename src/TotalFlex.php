@@ -202,6 +202,8 @@ class TotalFlex {
 			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 			if ( $Field->isPrimaryKey ( ) ) continue ;
 
+			$Field->processUpdate();
+
     		$fieldValuesList[] = $Field->getValue();
 			$queryFieldList[$Field->getColumn()] = $Field->getValue();
 
@@ -238,25 +240,33 @@ class TotalFlex {
 
 		$fieldList = $view->getFieldsFromContext ( $myContext );
 
+		// extract field names and values
 		$queryFieldList = array ( );
 		foreach ( $fieldList as $Field ) {
 			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 			if ( $Field->isPrimaryKey() ) continue ;
+
+			$Field->processCreate();
+
 			// $queryFieldList[$Field->getColumn()] = $Field->getValue();
 			$columnList[] = $Field->getColumn();
 			$valueList[] = $Field->getValue();
 		}
 
+		// now that we have all fields and it's values, let's get query to create and execute it
 		$query     = $view->queryBuilder()->getCreateQuery($columnList);
 		$statement = $this->_targetDb->prepare($query);
 		$exec      = $statement->execute($valueList);
 
 		if ( $exec ) {
+
+			// if executed with success, let's set empty to all fields to clear form,
 			foreach ( $fieldList as $Field ) {
 				if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 				if ( $Field->isPrimaryKey() ) continue ;
 				$Field->setValue('');
 			}
+
 			Feedback::addMessage( $this->_feedbackMessageList['success'][TotalFlex::CtxCreate] , Feedback::MESSAGE_SUCCESS );
 			// need redirect here to avoid user repost
 		} else {

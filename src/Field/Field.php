@@ -135,6 +135,25 @@ class Field {
 
 	}
 
+	/**
+	 * process something we need to process before create
+	 * @return [type] [description]
+	 */
+	public function processCreate ( ) {
+
+	}
+
+	/**
+	 * process something we need to process before update
+	 * @return [type] [description]
+	 */
+	public function processUpdate ( ) {
+
+
+	}
+
+
+
 	public function setEmptyValue ( $emptyValue ) {
 		$this->_emptyValue = $emptyValue ;
 		return $this;
