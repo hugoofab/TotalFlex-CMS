@@ -57,7 +57,7 @@ class QueryBuilder {
 
     	for ( $i = 0 ; $i< count ( $keyList ) ; $i++ ) $markList[] = "?" ;
 
-    	$output = "INSERT INTO " . implode ( ', ' , $this->_queryFrom ) . "( " . implode ( ', ' , $keyList ) . " ) VALUES ".
+    	$output = "INSERT INTO `" . implode ( '`, `' , $this->_queryFrom ) . "` ( `" . implode ( '`, `' , $keyList ) . "` ) VALUES ".
     	"( " . implode ( "," , $markList ) . " )";
 
     	return $output;
@@ -77,7 +77,7 @@ class QueryBuilder {
     		$fieldSelect[] = $Field->getColumn ( );
     	}
 
-		$query = "SELECT \n\t" . implode ( ", \n\t" , $fieldSelect ) . " \n\nFROM " . implode ( ", \n\t" , $this->_queryFrom ) . "\n" . implode ( "\n\t" , $this->_queryJoin ) ;
+		$query = "SELECT \n\t`" . implode ( "`, \n\t`" , $fieldSelect ) . "` \n\nFROM " . implode ( ", \n\t" , $this->_queryFrom ) . "\n" . implode ( "\n\t" , $this->_queryJoin ) ;
 		if ( count ( $this->_queryWhere ) > 0 )	$query .= "\nWHERE " . implode ( " \nAND " , $this->_queryWhere ) ;
 
 		return $query ;
