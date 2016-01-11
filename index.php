@@ -29,8 +29,8 @@ use TotalFlex\Field;
 // $conn = null;
 
 // macbook
-$pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
-// $pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
+// $pdo = new PDO("mysql:host=10.0.1.8;dbname=fazerbrasil", "root", "");
+$pdo = new PDO("mysql:dbname=fazerbrasil", "root", "");
 
 // imac
 // $pdo = new PDO("mysql:dbname=test", "root", "");
@@ -113,8 +113,8 @@ $TotalFlex->registerView('business_entity')
 		// futuramente deve ser possível passar uma query no lugar do array, ou um objeto especial que recebe a query e devolve o array
 		->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
 		->addField ( Field\SelectDB::getInstance ( "id_page" , "Página" , "title" , "id_page" , "select '' id_page , 'Nenhuma' title union select id_page , title from page" ) )
-
-		->addField ( Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 40 , Field\File::TYPE_WEB_IMAGE ) )
+		->addField ( Field\Text::getInstance ( "name" , "Nome" ) )
+		->addField ( Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 100 , Field\File::TYPE_WEB_IMAGE ) )
 
 		->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
 
