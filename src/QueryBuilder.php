@@ -93,16 +93,20 @@ class QueryBuilder {
 
     	$fieldValuesList = $primaryKeyList = array ( );
     	foreach ( $fieldList as $Field ) {
+    		
     		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 
+			if ( $Field->skipOnUpdate ( ) ) continue ;
+
     		if ( $Field->isPrimaryKey ( ) ) {
-    			$primaryKeyList[] = " " . $Field->getColumn() . " = ? ";
+    			$primaryKeyList[] = " `" . $Field->getColumn() . "` = ? ";
     		} else {
-	    		$fieldValuesList[] = " " . $Field->getColumn() . " = ? ";
+	    		$fieldValuesList[] = " `" . $Field->getColumn() . "` = ? ";
     		}
+
     	}
 
-    	$query = "UPDATE " . implode ( ", \n\t" , $this->_queryFrom ) . " SET " . implode ( ", \n\t" , $fieldValuesList ) . " WHERE " . implode ( " AND \n\t" , $primaryKeyList );
+    	$query = "UPDATE `" . implode ( "`, \n\t`" , $this->_queryFrom ) . "` SET " . implode ( ", \n\t" , $fieldValuesList ) . " WHERE " . implode ( " AND \n\t" , $primaryKeyList );
 
     	return $query ;
 

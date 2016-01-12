@@ -98,14 +98,21 @@ class File extends Field {
 		if ( !$folderToSave = realpath ( $folderToSave ) ) throw new \TotalFlex\Exception\InvalidPath ( "Diretório para salvar inválido ( $folderToSave ) " );
 		$this->_targetFolder   = $folderToSave ;
 		$this->_webFolder      = $webFolder ;
-		$this->_allowedTypes   = $allowedTypes ;
+
+		if ( !empty ( $allowedTypes ) ) $this->setAllowedTypes ( $allowedTypes ) ;
 
 		$this->_maxFileSize    = ini_get("upload_max_filesize");
 		$this->_maxFileUploads = ini_get("max_file_uploads");
 
 		$this->_fileNameLimit = $fileNameLimit ;
 
-		$allowedTypesArray = array ();
+	}
+
+	public function setAllowedTypes ( $allowedTypes ) {
+		
+		$this->_allowedTypes = $allowedTypes ;
+		$allowedTypesArray   = array ();
+
 		if ( gettype ( $allowedTypes ) !== "array" ) {
 
 			foreach ( $this->_knownTypes as $key => $typesArray ) {
@@ -120,6 +127,78 @@ class File extends Field {
 
 	}
 
+	public function skipOnUpdate ( ) {
+
+		$file = array (
+			'name'     => "" ,
+			'type'     => "" ,
+			'tmp_name' => "" ,
+			'error'    => "" ,
+			'size'     => ""
+		);
+
+		if ( !isset ( $_FILES["TFFields"]['name'][$this->getView()->getName()]['4']['fields'][$this->getColumn()] ) ) {
+			return true ;
+		}
+
+		foreach ( $file as $key => &$value ) 
+			$value = $_FILES["TFFields"][$key][$this->getView()->getName()]['4']['fields'][$this->getColumn()];
+
+		if ( !is_uploaded_file ( $file['tmp_name'] ) ) {
+			return true ;
+		}
+
+		return false;
+
+	}
+
+	/**
+	 * process something we need to process before update
+	 * @return [type] [description]
+	 */
+	public function processUpdate ( ) {
+
+		$file = array (
+			'name'     => "" ,
+			'type'     => "" ,
+			'tmp_name' => "" ,
+			'error'    => "" ,
+			'size'     => ""
+		);
+
+		if ( !isset ( $_FILES["TFFields"]['name'][$this->getView()->getName()]['4']['fields'][$this->getColumn()] ) ) {
+			return false ;
+		}
+
+		foreach ( $file as $key => &$value ) 
+			$value = $_FILES["TFFields"][$key][$this->getView()->getName()]['4']['fields'][$this->getColumn()];
+
+		if ( !is_uploaded_file ( $file['tmp_name'] ) ) {
+			prd("NOT UPLOAD")	;
+			throw new Exception ( $this->getUploadErrorMessage ( $file['error'] ) );
+		}
+
+		
+		if ( !in_array ( \TotalFlex\MimeType::extractExt ( $file['name'] ) , $this->_allowedTypes ) ) 
+			throw new \TotalFlex\Exception\InvalidFileType ( "Not allowed file type" );
+		
+		if ( !\TotalFlex\MimeType::extensionMatchMimeType ( \TotalFlex\MimeType::extractExt ( $file['name'] ) , $file['type'] ) ) 
+			throw new \TotalFlex\Exception\InvalidFileType ( "Invalid file" );
+
+		$file['newFileName'] = $this->getNewFileName ( $file['name'] , $this->_targetFolder ) ;
+
+		if ( move_uploaded_file ( $file['tmp_name'] , $this->_targetFolder . DIRECTORY_SEPARATOR . $file['newFileName'] ) ) {
+			$this->setValue ( $file['newFileName'] );
+		} else {
+			$this->setValue ( null );
+			throw new Exception ( "Não foi possível salvar o arquivo" );
+			
+			return false;
+		}
+
+		return true ;
+
+	}
 
 	/**
 	 * process something we need to process before create
@@ -135,12 +214,16 @@ class File extends Field {
 			'size'     => ""
 		);
 
+		if ( !isset ( $_FILES["TFFields"]['name'][$this->getView()->getName()]['1']['fields'][$this->getColumn()] ) ) {
+			return false ;
+		}
+
 		foreach ( $file as $key => &$value ) 
 			$value = $_FILES["TFFields"][$key][$this->getView()->getName()]['1']['fields'][$this->getColumn()];
-
+		
 		if ( !is_uploaded_file ( $file['tmp_name'] ) ) 
 			throw new Exception ( $this->getUploadErrorMessage ( $file['error'] ) );
-		
+
 		if ( !in_array ( \TotalFlex\MimeType::extractExt ( $file['name'] ) , $this->_allowedTypes ) ) 
 			throw new \TotalFlex\Exception\InvalidFileType ( "Not allowed file type" );
 		
@@ -183,9 +266,10 @@ class File extends Field {
 	 */
 	private function getUniqueFileName ( $folderToSave , $fileName ) {
 
-		$rand = substr(md5(mt_rand()),0,10) ;
-		$outputFile = preg_replace ( "/^(.*)(\.\w+)$/" , "$1-".$rand."$2" , $fileName );
-
+		$rand       = substr(md5(mt_rand()),0,10) ;
+		$ext        = preg_replace ( "/^(.*)(\.\w+)$/" , "$2" , $fileName );
+		$withoutExt = preg_replace ( "/^(.*)(\.\w+)$/" , "$1" , $fileName );
+		$outputFile = strtolower ( $withoutExt . "-" . $rand . $ext );
 		$outputFile = substr ( $outputFile , $this->_fileNameLimit*-1 ) ;
 
 		if ( file_exists ( $folderToSave . "/" . $outputFile ) ) {
@@ -220,17 +304,6 @@ class File extends Field {
             default                     : return "Erro de upload não identificado" ; //8
         }
 	}
-
-
-	/**
-	 * process something we need to process before update
-	 * @return [type] [description]
-	 */
-	public function processUpdate ( ) {
-
-
-	}
-
 
 	public function getType ( ) {
 		return "file";

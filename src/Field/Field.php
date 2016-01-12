@@ -412,15 +412,23 @@ class Field {
      * @param mixed $value Value to validate
      * @return boolean Value validity
      */
-    public function validate($value) {
-        foreach ($this->_rules as $rule) {
-            $valid = $rule->validate($value);
-            if (!$valid) {
-                return false;
-            }
+    public function validate ( $context ) {
+
+        $value = $this->getValue();
+        foreach ( $this->_rules as $rule ) {
+			if ( !$rule->validate ( $value ) ) return false;
         }
 
         return true;
+        
+    }
+
+    public function skipOnUpdate ( ) {
+    	return false ;
+    }
+
+    public function skipOnSave ( ) {
+    	return false ;
     }
 
     /**

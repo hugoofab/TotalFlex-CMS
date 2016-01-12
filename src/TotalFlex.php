@@ -9,6 +9,7 @@ use TotalFlex\Support\RequestParameters;
 use \FluentPDO;
 
 class TotalFlex {
+
 	/**
 	 * @var CtxNone No context constant
 	 */
@@ -36,6 +37,11 @@ class TotalFlex {
 	const SECURITY_SALT = "wYWZzcjM5TMidzN0QWOiljZhRDMwUTNkhDNwUDN0ETMxEDMwMDOygTZihTO5IDN2QGM2QWZyYTZmZ";
 
 	/**
+	 * @var string default formatter to simplify method calls
+	 */
+	private static $defaultFormatter = 'html';
+
+	/**
 	 * @var string $_callbackUrl Callback URL to forms access TotalFlex
 	 */
 	private $_callbackUrl;
@@ -54,6 +60,16 @@ class TotalFlex {
 	 * @var array $_views Views configuration
 	 */
 	private $_views;
+
+	/**
+	 * @var should be a anonymous function to be executed after success
+	 */
+	private $_successCallback = null ;
+
+	/**
+	 * @var should be a anonymous function to be executed after an error
+	 */
+	private $_errorCallback = null ;
 
 	/**
 	 * @var null default db to be used on all classes that need it. we expects it be a pdo instance
@@ -134,6 +150,31 @@ class TotalFlex {
 
 	}
 
+	/**
+	 * Just do it! simplify form generation proccess by using default configuration and grouping method calls
+	 * @param  [type] $viewName  [description]
+	 * @param  [type] $context   [description]
+	 * @param  [type] $callback  [description]
+	 * @param  [type] $formatter [description]
+	 * @return [type]            [description]
+	 */
+	public function doIt ( $context , $viewName = null , $callback = null , $formatter = null ) {
+		
+		if ( $viewName === null ) {
+			if ( count ( $this->_views ) === 0 ) throw new Exception ( "No view set to show" );
+			if ( count ( $this->_views ) > 1 ) {
+				throw new \Exception ( "Missing view name" );
+			} else {
+				reset($this->_views);
+				$view = current($this->_views);
+				$viewName = $view->getName ();
+			}
+		}
+
+		$this->processPost ( $viewName , $context , $callback ) ;
+		return $this->generate ( $viewName , $context , $formatter );
+	}
+
 	public static function setDefaultDB ( $db ) {
 		self::$defaultDB = $db ;
 	}
@@ -150,7 +191,6 @@ class TotalFlex {
 	 */
     public function processPost ( $viewName , $context , $callback = null ) {
 
-
     	if ( empty ( $_POST ) ) return ;
 		if ( $this->hasContext ( TotalFlex::CtxCreate , $context ) ) $return = $this->_processCreate ( $viewName );
 		if ( $this->hasContext ( TotalFlex::CtxDelete , $context ) ) $return = $this->_processDelete ( $viewName );
@@ -161,9 +201,6 @@ class TotalFlex {
 		}
 
 		return $return ;
-		// if ( $this->hasContext ( TotalFlex::CtxRead , $context ) ) $this->_processDelete ( $view );
-
-		// TFFields[business_entity][1][fields][name]
 
     }
 
@@ -176,6 +213,9 @@ class TotalFlex {
 
 		$myContext = TotalFlex::CtxUpdate ;
 		$view      = $this->getView ( $viewName );
+		
+		// isso vai sobrescrever os valores postados, portanto não é recomendado
+		// $this->setData($view);
 
 		// @todo precisa desacoplar. Chamar o $_POST dessa maneira tão engessada não é a melhor forma.
 		if ( empty ( $_POST['TFFields'][$viewName][$myContext] ) ) return ;
@@ -197,19 +237,44 @@ class TotalFlex {
 		$fieldList = $view->getFieldsFromContext ( $myContext );
 
 		$queryFieldList = $fieldValuesList = array ( );
+		$errorList = array ( );
 		foreach ( $fieldList as $Field ) {
 
-			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
-			if ( $Field->isPrimaryKey ( ) ) continue ;
+			try {
 
-			$Field->processUpdate();
+				if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+				if ( $Field->isPrimaryKey ( ) ) continue ;
+		
+					// prs($Field->getColumn() . " " . $Field->getValue() . " skip: " . $Field->skipOnUpdate());
+				
+				$Field->validate ( $myContext );
 
-    		$fieldValuesList[] = $Field->getValue();
-			$queryFieldList[$Field->getColumn()] = $Field->getValue();
+				if ( $Field->skipOnUpdate ( ) ) continue ;
+	// dois tipos de validação
+	// 	1: erro e não pode continuar
+	// 	2: erro e ignora este campo
+				$Field->processUpdate();
+
+	    		$fieldValuesList[] = $Field->getValue();
+				$queryFieldList[$Field->getColumn()] = $Field->getValue();
+
+			} catch (Exception $e) {
+				$errorList[] = $e->getMessage ( );
+			}
 
 		}
 
+		if ( !empty ( $errorList ) ) {
+			// A LISTA DE ERROS ESTA CHEIA,
+			// DEVEMOS:
+			// 	VOLTAR AO FORM E EXIBIR TODAS AS MENSAGENS DE ERRO
+			//  PARAR POR AQUI E NAO SALVAR NADA DO QUE FOI RECEBIDO VIA POST
+		}
+
 		$query = $view->queryBuilder()->getUpdateSaveQuery ( $view->getFields() );
+
+// pr($fieldValuesList)		;
+// prd($query);
 
 // @todo precisa desacoplar. Chamar o $_POST dessa maneira tão engessada não é a melhor forma.
 		foreach ( $primaryKeyFields as $pkField ) array_push ( $fieldValuesList , $_POST['TFFields'][$view->getName()][$myContext]['fields'][$pkField->getColumn()] );
@@ -239,6 +304,15 @@ class TotalFlex {
 		if ( empty ( $_POST['TFFields'][$viewName][$myContext] ) ) return ;
 
 		$fieldList = $view->getFieldsFromContext ( $myContext );
+
+// DEVE COLOCAR A CHAMADA À VALIDAÇ˜AO DE CADA FIELD AQUI
+// ** a validação deve:		
+// * - validar todos os campos independente se um deles já não passou no teste
+// * - retornar ao formulario para que o usuário possa editar e indicar todos os campos que não passaram com sua respectiva mensagem de erro
+// * - passar o contexto para que a validação seja feita dentro de um contexto específico ex.:
+// *		pode ser que um campo seja obrigatório na criação mas não na edição
+// * 		os campos de validação já estão considerando que é necessário guardar o contexto conforme a classe FieldAbstract
+// 			
 
 		// extract field names and values
 		$queryFieldList = array ( );
@@ -319,8 +393,9 @@ class TotalFlex {
      *   configure it as you want, for example: passing as a instance parameter the array of templates for html elements.
      *   if you don't need to configure it, you can pass just a string with the formatter you want to use
      */
-    public function generate ( $viewName , $context , $Formatter ) {
+    public function generate ( $viewName , $context , $Formatter = null ) {
 
+    	if ( $Formatter === null ) $Formatter = self::$defaultFormatter ;
     	if ( !in_array ( $context , array ( TotalFlex::CtxNone , TotalFlex::CtxCreate , TotalFlex::CtxRead , TotalFlex::CtxUpdate , TotalFlex::CtxDelete ) ) ) throw new Exception\ManyContext ( "Please generate with one context at a time" );
 
     	if ( gettype ( $Formatter ) === 'string' ) {

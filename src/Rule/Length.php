@@ -3,7 +3,7 @@
 namespace TotalFlex\Rule;
 use TotalFlex\IRule;
 
-class Length implements IRule {
+class Length extends FieldAbstract implements \TotalFlex\IRule {
 	/**
 	 * @var int $_min Min length
 	 */
