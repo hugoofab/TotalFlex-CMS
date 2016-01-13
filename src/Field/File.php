@@ -32,6 +32,11 @@ class File extends Field {
 	protected $_maxFileUploads = null ;
 
 	/**
+	 * @var boolean set it to true if file is uploaded successfully
+	 */
+	protected $_uploaded = false ;
+
+	/**
 	 * @var boolean true = rename file to a hash, false = keep original file name but strip out spaces, and special chars
 	 */
 	// protected $_rebuildFileName = true ;
@@ -47,7 +52,7 @@ class File extends Field {
 	 */
 	protected $_fileNameLimit = 0 ;
 
-	protected $_template = "\t<input type=\"file\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
+	protected static $defaultTemplate = "\t<input type=\"file\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
 
 	const TYPE_IMAGE     = 0b0001 ;
 	const TYPE_WEB_IMAGE = 0b0010 ;
@@ -108,6 +113,10 @@ class File extends Field {
 
 	}
 
+	public function isUploaded ( ) {
+		return $this->_uploaded;
+	}
+
 	public function setAllowedTypes ( $allowedTypes ) {
 		
 		$this->_allowedTypes = $allowedTypes ;
@@ -141,10 +150,7 @@ class File extends Field {
 			return true ;
 		}
 
-		foreach ( $file as $key => &$value ) 
-			$value = $_FILES["TFFields"][$key][$this->getView()->getName()]['4']['fields'][$this->getColumn()];
-
-		if ( !is_uploaded_file ( $file['tmp_name'] ) ) {
+		if ( $_FILES["TFFields"]['error'][$this->getView()->getName()]['4']['fields'][$this->getColumn()] > 0 ) {
 			return true ;
 		}
 
@@ -174,20 +180,20 @@ class File extends Field {
 			$value = $_FILES["TFFields"][$key][$this->getView()->getName()]['4']['fields'][$this->getColumn()];
 
 		if ( !is_uploaded_file ( $file['tmp_name'] ) ) {
-			prd("NOT UPLOAD")	;
 			throw new Exception ( $this->getUploadErrorMessage ( $file['error'] ) );
 		}
-
 		
 		if ( !in_array ( \TotalFlex\MimeType::extractExt ( $file['name'] ) , $this->_allowedTypes ) ) 
 			throw new \TotalFlex\Exception\InvalidFileType ( "Not allowed file type" );
 		
 		if ( !\TotalFlex\MimeType::extensionMatchMimeType ( \TotalFlex\MimeType::extractExt ( $file['name'] ) , $file['type'] ) ) 
-			throw new \TotalFlex\Exception\InvalidFileType ( "Invalid file" );
+			throw new \TotalFlex\Exception\InvalidFileType ( "Invalid file: " . $file['name'] . " != " .  $file['type'] );
 
 		$file['newFileName'] = $this->getNewFileName ( $file['name'] , $this->_targetFolder ) ;
 
 		if ( move_uploaded_file ( $file['tmp_name'] , $this->_targetFolder . DIRECTORY_SEPARATOR . $file['newFileName'] ) ) {
+			$this->_uploaded = true ;
+			if ( $oldFile = realpath ( $this->_targetFolder . DIRECTORY_SEPARATOR . $this->getValue ( ) ) ) unlink ( $oldFile ) ;
 			$this->setValue ( $file['newFileName'] );
 		} else {
 			$this->setValue ( null );
@@ -233,6 +239,7 @@ class File extends Field {
 		$file['newFileName'] = $this->getNewFileName ( $file['name'] , $this->_targetFolder ) ;
 
 		if ( move_uploaded_file ( $file['tmp_name'] , $this->_targetFolder . DIRECTORY_SEPARATOR . $file['newFileName'] ) ) {
+			$this->_uploaded = true ;
 			$this->setValue ( $file['newFileName'] );
 		} else {
 			$this->setValue ( null );

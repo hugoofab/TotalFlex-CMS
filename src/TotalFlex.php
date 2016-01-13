@@ -214,8 +214,15 @@ class TotalFlex {
 		$myContext = TotalFlex::CtxUpdate ;
 		$view      = $this->getView ( $viewName );
 		
-		// isso vai sobrescrever os valores postados, portanto não é recomendado
-		// $this->setData($view);
+		$this->setData($view);
+		
+		$fields = $view->getFields();
+
+		foreach ( $fields as $field ) {
+			if ( is_a ( $field , 'TotalFlex\Field\File' ) ) continue ;
+			if ( is_a ( $field , 'TotalFlex\Button' ) ) continue ;
+			$field->setValue ( $_POST['TFFields'][$viewName][$myContext]['fields'][$field->getColumn()] );
+		}
 
 		// @todo precisa desacoplar. Chamar o $_POST dessa maneira tão engessada não é a melhor forma.
 		if ( empty ( $_POST['TFFields'][$viewName][$myContext] ) ) return ;
@@ -283,6 +290,8 @@ class TotalFlex {
 
 		$statement = $this->_targetDb->prepare ( $query );
 		$exec = $statement->execute ( $fieldValuesList );
+// pr($query);
+// pr($fieldValuesList);
 
 		if ( $exec ) {
 			Feedback::addMessage( $this->_feedbackMessageList['success'][TotalFlex::CtxUpdate] , Feedback::MESSAGE_SUCCESS );

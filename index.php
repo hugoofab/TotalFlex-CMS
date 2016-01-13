@@ -114,7 +114,11 @@ $TotalFlex->registerView('business_entity')
 		->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
 		->addField ( Field\SelectDB::getInstance ( "id_page" , "Página" , "title" , "id_page" , "select '' id_page , 'Nenhuma' title union select id_page , title from page" ) )
 		->addField ( Field\Text::getInstance ( "name" , "Nome" ) )
-		->addField ( Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 100 , Field\File::TYPE_WEB_IMAGE ) )
+		->addField ( 
+			Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 100 , Field\File::TYPE_WEB_IMAGE ) 
+			->setTemplate ( "\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br><a target=\"_blank\" title=\"Clique para abrir\" href=\"http://projetos.dev/tmp/__value__\"><img width=\"100\" src=\"http://projetos.dev/tmp/__value__\"></a><br>\n\n" ) 
+		)
+
 
 		->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
 

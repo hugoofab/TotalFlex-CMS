@@ -94,7 +94,8 @@ class QueryBuilder {
     	$fieldValuesList = $primaryKeyList = array ( );
     	foreach ( $fieldList as $Field ) {
     		
-    		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+    		if ( is_a ( $Field , 'TotalFlex\Button' ) ) continue;
+    		if ( is_a ( $Field , 'TotalFlex\Field\File' ) && !$Field->isUploaded() ) continue ;
 
 			if ( $Field->skipOnUpdate ( ) ) continue ;
 
