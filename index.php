@@ -108,25 +108,79 @@ $TotalFlex->registerView('business_entity')
 
 	// USANDO O FIELD SELECT E SELECTDB ==========================================================================
 
+		// ->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate)
+		// ->addField ( Field\Text::getInstance ( "id_menu" , "ID" ) )->setPrimaryKey()
+		// // futuramente deve ser possível passar uma query no lugar do array, ou um objeto especial que recebe a query e devolve o array
+		// ->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
+		// ->addField ( Field\Text::getInstance ( "id_page" , "Página" ) )
+		// // ->addField ( Field\SelectDB::getInstance ( "id_page" , "Página" , "title" , "id_page" , "select '' id_page , 'Nenhuma' title union select id_page , title from page" ) )
+		// ->addField ( Field\Text::getInstance ( "name" , "Nome" ) )
+		// ->addField ( 
+		// 	Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 100 , Field\File::TYPE_WEB_IMAGE ) 
+		// 	->setTemplate ( "\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br><a target=\"_blank\" title=\"Clique para abrir\" href=\"http://projetos.dev/tmp/__value__\"><img width=\"100\" src=\"http://projetos.dev/tmp/__value__\"></a><br>\n\n" ) 
+		// )
+
+
+		// ->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
+
+		// ->where ( "id_menu = 19")
+
+		// ->setTable ( "menu" )
+
+	// USANDO RELACIONAMENTO N:N ================================================================
+	
 		->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate)
-		->addField ( Field\Text::getInstance ( "id_menu" , "ID" ) )->setPrimaryKey()
-		// futuramente deve ser possível passar uma query no lugar do array, ou um objeto especial que recebe a query e devolve o array
-		->addField ( Field\Select::getInstance ( "location" , "Posição" , array ( "Topo" => "T" , "Rodapé" => "B" /* , "Admin" => "A" */ ) ) )
-		->addField ( Field\SelectDB::getInstance ( "id_page" , "Página" , "title" , "id_page" , "select '' id_page , 'Nenhuma' title union select id_page , title from page" ) )
-		->addField ( Field\Text::getInstance ( "name" , "Nome" ) )
-		->addField ( 
-			Field\File::getInstance ( "tmp_file" , "Imagem" , "/Users/hugo/Sites/Projects/tmp/" , "/tmp/" , 100 , Field\File::TYPE_WEB_IMAGE ) 
-			->setTemplate ( "\t<input class=\"form-control\" type=\"__type__\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br><a target=\"_blank\" title=\"Clique para abrir\" href=\"http://projetos.dev/tmp/__value__\"><img width=\"100\" src=\"http://projetos.dev/tmp/__value__\"></a><br>\n\n" ) 
+		
+		// 
+		// ---- USER -------------< ROLE_USER >------------ ROLE -----
+		// 
+		
+		->addField(Field\Text::getInstance("id_user","ID"))->setPrimaryKey()
+		->addField("name","Nome")
+		
+		// RELACIONAMENTO N:N =========================================================================
+		// o TableLink com apenas um parâmetro significa que vai utilizar a própria configuração da view como source
+		// ->addField(Field\SelectMultiOptions::getInstance ( "Perfis de acesso do usuário" , "role_user" , array (
+		// 	\TotalFlex\TableLink::getInstance ( 'id_user' , 'id_user' ), 
+		// 	\TotalFlex\TableLink::getInstance ( \TotalFlex\DBSource::getInstance ( "description" , "id_role" , "SELECT id_role , description FROM role" ) , 'id_role' )	
+		// ) ) )
+		->addField(
+			Field\SelectMultiOptions::getInstance ( 
+				"Perfis de acesso do usuário" , // label
+				"role_user" , 					// target table 
+				"id_user" , 					// fixed target field
+				"4" , 							// value of fixed target field
+				\TotalFlex\DBSource::getInstance ( "description" , "id_role" , "SELECT id_role , description FROM role" ) // source
+			)
 		)
+		// ==========================================================================================
+
+		->addButton(Button::getInstance("Salvar",array("type"=>"submit")))
+
+		->setTable ( "user" )
+		->where ( "id_user = 4")
+
+// ================================================================================================================================
+
+// $relacionamentos = array (
+// 	new TbLink ( 'user.id_user' , 'role_user.id_user' ), // como extrair a origem da configuração atual?
+// 	new TbLink ( 'role.id_role' , 'role_user.id_role' )	 // como extrair a origem da configuração realizada?
+// );
+
+// new XYZ ( 'role' , 'id_role' , 'description' , 'active = "S" and visible = "S"' , 'description')
+
+// ================================================================================================================================
+
+// class TbLink {
+// 	public function __construct ( $destino , $origem = null ) {
+// 		// se origem === null, buscar origem na configuração atual
+// 	}
+// }
 
 
-		->addButton ( new Button ( "Salvar" , array ( 'class' => "btn btn-primary" , "type" => "submit" ) ) )
+// ================================================================================================================================
 
-		->where ( "id_menu = 19")
 
-		->setTable ( "menu" )
-
-	// ==========================================================================================
 
 
 ;

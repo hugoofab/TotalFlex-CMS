@@ -651,7 +651,7 @@ class MimeType {
 	}
 
 	public static function extractExt ( $filename ) {
-		return preg_replace ( '/^(.*)(\.\w+)$/' , "$2" , $filename );
+		return strtolower ( preg_replace ( '/^(.*)(\.\w+)$/' , "$2" , $filename ) );
 	}
 
 }

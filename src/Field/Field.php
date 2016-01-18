@@ -37,7 +37,7 @@ class Field {
 	/**
 	 * @var TotalFlex\Table This field's table
 	 */
-	private $_view;
+	protected $_view;
 
 	/**
 	 * @var mixed this is the value of the field
@@ -48,6 +48,16 @@ class Field {
 	 * @var string chave da variavel post
 	 */
 	private $_postKey;
+
+	/**
+	 * set it to true to not include it on create, update or select 
+	 * @var boolean
+	 */
+	protected $_skipOnCreate = false ;
+	protected $_skipOnUpdate = false ;
+	protected $_skipOnSelect = false ;
+	protected $_skipOnSetData = false ;
+	// private $_skipOnSave   = false ;
 
 	/**
 	 * Default template for all Fields
@@ -424,12 +434,26 @@ class Field {
         
     }
 
-    public function skipOnUpdate ( ) {
-    	return false ;
+    public function skipOnCreate ( ) {
+    	return $this->_skipOnCreate ;
     }
 
+    public function skipOnUpdate ( ) {
+    	return $this->_skipOnUpdate ;
+    }
+
+    /** talvez o "save" e "create" sejam a mesma coisa e devam ser resumidos em apenas um método */
     public function skipOnSave ( ) {
-    	return false ;
+    	return $this->_skipOnUpdate ;
+    	// return $this->_skipOnSave ;
+    }
+
+    public function skipOnSelect ( ) {
+    	return $this->_skipOnSelect ;
+    }
+
+    public function skipOnSetData ( ) {
+    	return $this->_skipOnSetData ;
     }
 
     /**

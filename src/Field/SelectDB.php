@@ -11,8 +11,6 @@ class SelectDB extends Field {
 	 */
 	protected $_options = array ( );
 
-	protected $db = null ;
-
 	// it can be required in future
 	protected $_optionTemplate = "";
 
@@ -21,8 +19,8 @@ class SelectDB extends Field {
 	 */
 	protected static $defaultTemplate = "" ;
 
-	public static function getInstance ( $column , $label , $labelField , $valueField , $query , $db = null ) {
-		return new self ( $column , $label , $labelField , $valueField , $query , $db );
+	public static function getInstance ( $column , $label , $dbSourceOrLabelField , $valueField , $query , $db = null ) {
+		return new self ( $column , $label , $dbSourceOrLabelField , $valueField , $query , $db );
 	}
 
 	/**
@@ -30,9 +28,11 @@ class SelectDB extends Field {
 	 *
 	 * @param string $column Field column name
 	 * @param string $label Field label
+	 * @param mixed $dbSourceOrLabelField it can be an string with field name if you want to pass field label name and field value (key) name and query
+	 * but you can make it passing a DBSource instance to $dbSourceOrLabelField param and ignoring another paramether in sequence
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct ( $column , $label , $labelField , $valueField , $query , $db = null ) {
+	public function __construct ( $column , $label , $dbSourceOrLabelField , $valueField = "" , $query = "" , $db = null ) {
 
 		if ( empty ( self::$defaultTemplate ) ) {
 			self::$defaultTemplate = Select::getDefaultTemplate();
@@ -40,21 +40,12 @@ class SelectDB extends Field {
 
 		parent::__construct ( $column , $label );
 
-		if ( $db !== null ) {
-			$this->db = $db ;
-		} else if ( \TotalFlex\TotalFlex::getDefaultDB () !== null ) {
-			$this->db = \TotalFlex\TotalFlex::getDefaultDB();
-		} else {
-			throw new DefaultDBNotSet ( "You have to set default db with TotalFlex::setDefaultDB() or give it as an argument in constructor method" );
-		}
+		$dbSource = $dbSourceOrLabelField ;
+		if ( !is_a ( $dbSource , 'DBSource' ) ) {
+			$dbSource = new \TotalFlex\DBSource ( $dbSourceOrLabelField , $valueField , $query , $db );
+		} 
 
-    	$statement = $this->db->prepare ( $query );
-    	if ( !$statement->execute() ) throw new Exception ( $statement->errorInfo() );
-    	$result = $statement->fetchAll ( \PDO::FETCH_ASSOC );
-
-    	foreach ( $result as $res ) {
-    		$this->_options[$res[$labelField]] = $res[$valueField] ;
-    	}
+		$this->_options = $dbSource->getLabelAsKeyFieldAsValue ( ) ;
 
 	}
 

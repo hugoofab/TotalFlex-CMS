@@ -29,11 +29,23 @@ class Button {
 	protected $cellParams     = array ( ) ;
 	protected $data ;
 
+	protected static $defaultTemplate = "<button __attributeset__ >__content__</button>";
+
+	protected $_template = "" ;
+
+	public static function getInstance ( $label , $attributes = array ( ) ) {
+		return new self ( $label , $attributes );
+	}
 
     public function __construct ( $label , Array $attributes = array () ) {
 		$this->setLabel($label) ;
 		$this->_attributes   = $attributes ;
+		$this->_template   = self::$defaultTemplate;
     }
+
+    public static function setDefaultTemplate ( $defaultTemplate ) {
+    	self::$defaultTemplate = $defaultTemplate ;
+    }    
 
     /**
      * set one attribute

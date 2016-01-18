@@ -210,6 +210,7 @@ class TotalFlex {
     }
 
     private function _processUpdate ( $viewName ) {
+// pr($_POST);
 
 		$myContext = TotalFlex::CtxUpdate ;
 		$view      = $this->getView ( $viewName );
@@ -221,6 +222,7 @@ class TotalFlex {
 		foreach ( $fields as $field ) {
 			if ( is_a ( $field , 'TotalFlex\Field\File' ) ) continue ;
 			if ( is_a ( $field , 'TotalFlex\Button' ) ) continue ;
+			if ( $field->skipOnUpdate() ) continue; 
 			$field->setValue ( $_POST['TFFields'][$viewName][$myContext]['fields'][$field->getColumn()] );
 		}
 
@@ -329,6 +331,8 @@ class TotalFlex {
 			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 			if ( $Field->isPrimaryKey() ) continue ;
 
+if ( $Field->skipOnCreate ( ) ) continue ;
+
 			$Field->processCreate();
 
 			// $queryFieldList[$Field->getColumn()] = $Field->getValue();
@@ -363,7 +367,8 @@ class TotalFlex {
     /**
      * get the configuration and set data to field list
      */
-    public function setData ( &$View ) {
+    // public function setData ( &$View ) { // esse modelo (com '&') estava gerando um comportamento estranho. o objeto $View virava string misteriosamente
+    public function setData ( $View ) {
 
 		// check if we have at least one primary key field
 		// if not, throw an exception
@@ -372,9 +377,10 @@ class TotalFlex {
     	$query = $View->queryBuilder()->getUpdateGetQuery ( $View->getFields() );
 
 // executar a query e alimentar os valores dos fields
+// pr($query);
 
     	$statement = $this->_targetDb->prepare ( $query );
-    	if ( !$statement->execute() ) throw new Exception ( $statement->errorInfo() );
+    	if ( !$statement->execute() ) throw new \Exception ( $statement->errorInfo() );
     	$result = $statement->fetchAll ( \PDO::FETCH_ASSOC );
 
     	if ( count ( $result ) > 1 ) throw new \Exception ( "Result can't be more than one row" );
@@ -386,6 +392,7 @@ class TotalFlex {
 
     	foreach ( $fieldList as &$Field ) {
     		if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
+    		if ( $Field->skipOnSetData ( ) ) continue ;
     		$Field->setValue ( $result[$Field->getColumn()] );
     	}
 
