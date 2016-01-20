@@ -67,7 +67,7 @@ class SelectMultiOptions extends Field {
 					\n__options__\n
 				</select>
 			</div>
-			<button onclick=\"__btnaddclick__\" class=\"btn btn-default\" id=\"__addbuttonid__\" type=\"button\" >Adicionar</button>
+			<button onclick=\"__btnaddclick__\" class=\"btn btn-primary\" id=\"__addbuttonid__\" type=\"button\" >Add</button>
 		</div>	
 
 		<table class=\"table table-select-multi-options\" id=\"__tableid__\">
@@ -301,8 +301,6 @@ class SelectMultiOptions extends Field {
 	}
 
 	public function skipOnUpdate ( ) {
-		$this->proccessUpdate();
-// pr($viewName);
 		return true ;
 	}
 
@@ -310,20 +308,24 @@ class SelectMultiOptions extends Field {
 	
 		$viewName = $this->_view->getName();
 
-/// 	PROCESSAR POST RECEBIDO
+		if ( empty ( $_POST['TFFields'][$viewName]["4"][$this->_elementId] ) ) return false ;
 
-		// $_POST['TFFields'][$viewName][\TotalFlex\TotalFlex::CtxUpdate][TotalFlex_Field_SelectMultiOptions1] => ArraY
-		$data = $_POST['TFFields'][$viewName]["4"][$this->_elementId];
+		$data     = $_POST['TFFields'][$viewName]["4"][$this->_elementId];
+		$query    = "DELETE FROM `$this->_targetTable` WHERE `$this->_fixedField` = $this->_fixedFieldValue";
+		$fieldKey = $this->_source->getFieldKey();
 
-		pr($data);
-
-
-
+		foreach ( $data as $dataId ) {
+			$query = "INSERT INTO `$this->_targetTable` ( `$this->_fixedField` , `$fieldKey` ) VALUES ( '$this->_fixedFieldValue' , '$dataId' )"; 
+			$this->db->query ( $query );
+		}
 
 	}
 
 
     public function toHtml ( $context ) {
+
+		$this->proccessUpdate();
+
 
 		// $this->setData ( ) ;
 

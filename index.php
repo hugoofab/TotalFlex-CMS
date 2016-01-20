@@ -70,7 +70,8 @@ $TotalFlex = new TotalFlex ( );
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
-	<link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<!-- <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet" /> -->
+	<link href="http://imidiatv.dev/assets/bootstrap-3.3.2/css/bootstrap.min.css" rel="stylesheet" />
 
 	<style>
 		*,html,body{font-size: 1em;}
