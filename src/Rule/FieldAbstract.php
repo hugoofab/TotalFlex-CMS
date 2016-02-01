@@ -2,7 +2,7 @@
 
 namespace TotalFlex\Rule;
 
-class Abstract {
+abstract class FieldAbstract {
 
 	protected $_contexts ;
 

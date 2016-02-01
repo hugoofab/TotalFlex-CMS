@@ -2,13 +2,7 @@
 
 namespace TotalFlex;
 
-class Button {
-
-	// CONFIRMADOS NA NOVA VERSÃO
-	/**
-	 * @var array[Context] The contexts this fields is allowed
-	 */
-	private $_contexts;
+class Button extends \TotalFlex\Html {
 
 	protected $_label          = "" ;
 
@@ -103,19 +97,6 @@ class Button {
         return $this;
     }
 
-    /**
-     * Gets the contexts this fields is allowed
-     *
-     * @return int The contexts this fields is allowed
-     */
-    public function getContexts() {
-        return $this->_contexts;
-    }
-
-    public function isInContext($context) {
-        return (($context & $this->getContexts()) !== 0);
-    }
-
     // public static function getInstance ( $label , $class = "" ) {
     //     $instance = new Button ( $label , $class ) ;
     //     return $instance ;
@@ -143,11 +124,8 @@ class Button {
         foreach ( $this->_attributes as $key => $value ) $attributeSet[$key] = $value ;
         foreach ( $attributeSet as $key => $value )     $attributeSetString .= " $key=\"$value\"" ;
 
-        $output =
-            "<button $attributeSetString>" .
-                $this->getLabel() .
-            "</button>\n"
-        ;
+        $output = str_replace ( "__attributeset__" , $attributeSetString , $this->_template );
+        $output = str_replace ( "__content__" , $this->getLabel() , $output );
 
         return $output;
 
@@ -203,17 +181,6 @@ class Button {
     //     $this->style = implode ( ";" , $styleList );
     //     return $this;
     // }
-
-    /**
-     * Sets the contexts this fields is allowed
-     *
-     * @param int The contexts this fields is allowed. See TotalFlex::Ctx* constants.
-     * @return self
-     */
-    public function setContexts($contexts) {
-        $this->_contexts = $contexts;
-        return $this;
-    }
 
     public function setType ( $type ) {
         $this->buttonType = $type ;

@@ -6,14 +6,19 @@ use TotalFlex\Field\Field;
 
 class Hidden extends Field {
 
-	private $_template = "\t<input type=\"hidden\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/><br>\n\n";
 
-	public static function getInstance ( $column , $label ) {
-		return new Hidden ( $column , $label );
+	protected static $defaultEncloseStart  = "";
+	protected static $defaultEncloseEnd    = "";
+	
+	protected static $defaultTemplate = "\t<input type=\"hidden\" name=\"__name__\" id=\"__id__\" value=\"__value__\"/>\n\n";
+	protected static $defaultLabelTemplate = "";
+
+	public static function getInstance ( $column ) {
+		return new Hidden ( $column , $column );
 	}
 
 	public function getLabel ( ) {
-		return "";
+		return "" ;
 	}
 
 	public function getType ( ) {
@@ -21,7 +26,7 @@ class Hidden extends Field {
 	}
 
 	public function getTemplate ( ){
-		return "<input type=\"hidden\" name=\"__name__\" value=\"__value__\" id=\"__id__\" />\n";
+		return $this->_template;
 	}
 
 }

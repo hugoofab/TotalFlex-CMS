@@ -128,6 +128,9 @@ $TotalFlex->registerView('business_entity')
 
 		// ->setTable ( "menu" )
 
+	// ADICIONANDO ELEMENTO HTML QUALQUER ================================================================
+		// ->addElement( new \TotalFlex\Html("<br clear=\"all\"><hr style=\"border: 1px solid rgb(119, 119, 119);\">"))
+
 	// USANDO RELACIONAMENTO N:N ================================================================
 	
 		->setContexts(TotalFlex::CtxUpdate|TotalFlex::CtxCreate)

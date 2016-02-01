@@ -77,6 +77,7 @@ class QueryBuilder {
 			if ( $Field->skipOnSelect ( ) ) continue ;
     		$fieldSelect[] = $Field->getColumn ( );
     	}
+// prd($fieldSelect);
 
 
 		$query = "SELECT \n\t`" . implode ( "`, \n\t`" , $fieldSelect ) . "` \n\nFROM " . implode ( ", \n\t" , $this->_queryFrom ) . "\n" . implode ( "\n\t" , $this->_queryJoin ) ;
@@ -96,7 +97,7 @@ class QueryBuilder {
     	$fieldValuesList = $primaryKeyList = array ( );
     	foreach ( $fieldList as $Field ) {
     		
-    		if ( is_a ( $Field , 'TotalFlex\Button' ) ) continue;
+    		if ( is_a ( $Field , '\TotalFlex\Html' ) ) continue;
     		if ( is_a ( $Field , 'TotalFlex\Field\File' ) && !$Field->isUploaded() ) continue ;
 			if ( !$Field->isInContext ( TotalFlex::CtxUpdate ) ) continue ;
 			

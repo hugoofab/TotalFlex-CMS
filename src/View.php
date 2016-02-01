@@ -37,6 +37,9 @@ class View {
      */
     private $_contexts;
 
+    /** @var function filterAction is a function that will be invoked before anything */
+    private $_filterAction ;
+
     private $_form ;
 
     /**
@@ -258,6 +261,40 @@ class View {
     public function addButton ( \TotalFlex\Button $Button ) {
     	$Button->setContexts ( $this->_contexts );
     	$this->_fields[] = $Button ;
+    	return $this ;
+    }
+
+    /**
+     * call functino callback 
+     * @param  [type] $post [description]
+     * @return [type]       [description]
+     */
+    public function preFilter ( $context ) {
+    	$filterAction = $this->_filterAction ;
+		if ( gettype ( $filterAction ) === "object" ) {
+			return $filterAction ( $context , $this , TotalFlex::getDefaultDB() );
+		} else {
+			return true ;
+		}
+    }
+
+    /**
+     * add a function callback to be called before anything
+     * @param [type] $filterAction [description]
+     */
+    public function addFilter ( $filterAction ) {
+
+		if ( gettype ( $filterAction ) === "object" ) {
+			$this->_filterAction = $filterAction ;
+		}
+
+		return $this ;
+
+    }
+
+    public function addElement ( \TotalFlex\Html $Element ) {
+    	$Element->setContexts ( $this->_contexts );
+    	$this->_fields[] = $Element ;
     	return $this ;
     }
 

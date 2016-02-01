@@ -84,7 +84,7 @@ class SelectMultiOptions extends Field {
 
 	protected $_tableRowTemplate = "<tr id=\"__optionrowid__\">
 		<td>__optionname__</td>
-		<td>
+		<td width=\"1\">
 			<input type=\"hidden\" name=\"__addedoptionname__\" id=\"__addedoptionid__\" value=\"__addedoptionvalue__\" >
 			<button onclick=\"__btnremoveclick__\" data-id=\"__dataid__\" id=\"__removebuttonid__\" class=\"btn btn-xs btn-danger btn-default\" type=\"button\" ><i class=\"glyphicon glyphicon-remove\"></i></button>
 		</td>
@@ -292,7 +292,7 @@ class SelectMultiOptions extends Field {
     	if ( !$statement->execute ( ) ) throw new \Exception ( $statement->errorInfo() );
     	$arrayResult = $statement->fetchAll ( \PDO::FETCH_ASSOC );
     	foreach ( $arrayResult as &$res ) {
-    		$res['description'] = $this->_options[$res[$this->_sourceLinkField]];
+    		$res[$this->_sourceLabel] = $this->_options[$res[$this->_sourceLinkField]];
     		unset($this->_options[$res[$this->_sourceLinkField]]);
     	}
 
@@ -304,7 +304,7 @@ class SelectMultiOptions extends Field {
 		return true ;
 	}
 
-	public function proccessUpdate ( ) {
+	public function processUpdate ( ) {
 	
 		$viewName = $this->_view->getName();
 
@@ -313,7 +313,8 @@ class SelectMultiOptions extends Field {
 		$data     = $_POST['TFFields'][$viewName]["4"][$this->_elementId];
 		$query    = "DELETE FROM `$this->_targetTable` WHERE `$this->_fixedField` = $this->_fixedFieldValue";
 		$fieldKey = $this->_source->getFieldKey();
-
+		$this->db->query ( $query );
+		
 		foreach ( $data as $dataId ) {
 			$query = "INSERT INTO `$this->_targetTable` ( `$this->_fixedField` , `$fieldKey` ) VALUES ( '$this->_fixedFieldValue' , '$dataId' )"; 
 			$this->db->query ( $query );
@@ -323,9 +324,6 @@ class SelectMultiOptions extends Field {
 
 
     public function toHtml ( $context ) {
-
-		$this->proccessUpdate();
-
 
 		// $this->setData ( ) ;
 

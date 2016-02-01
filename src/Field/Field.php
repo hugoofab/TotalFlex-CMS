@@ -113,6 +113,11 @@ class Field {
 		return static::$defaultTemplate ;
 	}
 
+	public function setMaxLength ( $maxLength ) {
+		$this->setAttribute('maxlength',$maxLength) ;
+		return $this ;
+	}
+
 	/**
 	 * only child classes will have it's own getInstance method
 	 */

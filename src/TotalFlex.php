@@ -191,6 +191,8 @@ class TotalFlex {
 	 */
     public function processPost ( $viewName , $context , $callback = null ) {
 
+    	if ( !$this->getView($viewName)->preFilter ( $context ) ) return false;
+
     	if ( empty ( $_POST ) ) return ;
 		if ( $this->hasContext ( TotalFlex::CtxCreate , $context ) ) $return = $this->_processCreate ( $viewName );
 		if ( $this->hasContext ( TotalFlex::CtxDelete , $context ) ) $return = $this->_processDelete ( $viewName );
@@ -210,7 +212,7 @@ class TotalFlex {
     }
 
     private function _processUpdate ( $viewName ) {
-// pr($_POST);
+// prd($_POST);
 
 		$myContext = TotalFlex::CtxUpdate ;
 		$view      = $this->getView ( $viewName );
@@ -221,9 +223,14 @@ class TotalFlex {
 
 		foreach ( $fields as $field ) {
 			if ( is_a ( $field , 'TotalFlex\Field\File' ) ) continue ;
-			if ( is_a ( $field , 'TotalFlex\Button' ) ) continue ;
+			if ( is_a ( $field , '\TotalFlex\Html' ) ) continue ;
+			if ( !$this->hasContext ( $myContext , $field->getContexts() ) ) continue ;
+			if ( !empty ( $_POST ) ) $field->processUpdate();
+
 			if ( $field->skipOnUpdate() ) continue; 
-			$field->setValue ( $_POST['TFFields'][$viewName][$myContext]['fields'][$field->getColumn()] );
+			if ( isset ( $_POST['TFFields'][$viewName][$myContext]['fields'][$field->getColumn()] ) ) {
+				$field->setValue ( $_POST['TFFields'][$viewName][$myContext]['fields'][$field->getColumn()] );
+			}
 		}
 
 		// @todo precisa desacoplar. Chamar o $_POST dessa maneira tão engessada não é a melhor forma.
@@ -331,7 +338,7 @@ class TotalFlex {
 			if ( !is_a ( $Field , 'TotalFlex\Field\Field' ) ) continue ;
 			if ( $Field->isPrimaryKey() ) continue ;
 
-if ( $Field->skipOnCreate ( ) ) continue ;
+			if ( $Field->skipOnCreate ( ) ) continue ;
 
 			$Field->processCreate();
 
@@ -339,11 +346,17 @@ if ( $Field->skipOnCreate ( ) ) continue ;
 			$columnList[] = $Field->getColumn();
 			$valueList[] = $Field->getValue();
 		}
-
 		// now that we have all fields and it's values, let's get query to create and execute it
 		$query     = $view->queryBuilder()->getCreateQuery($columnList);
+
+
 		$statement = $this->_targetDb->prepare($query);
 		$exec      = $statement->execute($valueList);
+
+// pr($columnList);
+// pr($valueList);
+// pr($query)		;
+// prd($exec);
 
 		if ( $exec ) {
 
@@ -355,11 +368,17 @@ if ( $Field->skipOnCreate ( ) ) continue ;
 			}
 
 			Feedback::addMessage( $this->_feedbackMessageList['success'][TotalFlex::CtxCreate] , Feedback::MESSAGE_SUCCESS );
+			return array (
+				'insert_id' => $this->_targetDb->lastInsertId()
+			);
+
 			// need redirect here to avoid user repost
 		} else {
 			$errorInfo = $this->_targetDb->errorInfo();
 			// pre($this->_targetDb->errorCode());
 			Feedback::addMessage ( $errorInfo[2] , Feedback::MESSAGE_DANGER );
+
+			return false ;
 		}
 
     }
@@ -377,7 +396,7 @@ if ( $Field->skipOnCreate ( ) ) continue ;
     	$query = $View->queryBuilder()->getUpdateGetQuery ( $View->getFields() );
 
 // executar a query e alimentar os valores dos fields
-// pr($query);
+// prd($query);
 
     	$statement = $this->_targetDb->prepare ( $query );
     	if ( !$statement->execute() ) throw new \Exception ( $statement->errorInfo() );
