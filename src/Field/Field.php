@@ -367,6 +367,7 @@ class Field {
     }
 
     public function getValue ( ) {
+    	if ( empty ( $this->_value ) ) return $this->_emptyValue ;
     	return $this->_value;
     }
 
