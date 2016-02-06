@@ -22,6 +22,16 @@ class Select extends Field {
 	public static function getInstance ( $column , $label , $options ) {
 		return new self ( $column , $label , $options );
 	}
+	
+	public function getValue ( ) {
+        if ( $this->_value === '' ) return $this->_emptyValue ;
+    	return $this->_value;
+    }
+
+    public function setValue ( $value ) {
+    	$this->_value = $value ;
+    	return $this;
+    }
 
 	/**
 	 * Constructs the field
